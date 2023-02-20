@@ -1,0 +1,157 @@
+initialize()
+{
+	if (!exists("L")) // chromosome length in bp
+		defineConstant("L", 750000);
+	if (!exists("selpos")) // selection position in bp
+		defineConstant("selpos", asInteger(L/2));
+	if (!exists("num_origins")) // how many genomes contains the selected mutation when selection starts.
+		defineConstant("num_origins", 1);
+	if (!exists("ne_rescale")) // the factor Ne will be scaled.
+		defineConstant("ne_rescale", 1);
+	
+	// parameters without scaling
+	if (!exists("N")) // ancient effective population size
+		defineConstant("N", 10000);
+	if (!exists("N0")) // the effective population size at sampling time
+		defineConstant("N0", 1000);
+	if (!exists("g_ne_change_start")) // Ne change time (generations ago -- BACKWARD)
+		defineConstant("g_ne_change_start", 200);
+	if (!exists("h")) // dominant coefficient
+		defineConstant("h", 0.5);
+	if (!exists("s")) // selection coefficient
+		defineConstant("s", 0.1);
+	if (!exists("g_sel_start")) // time of selected mutation being introduced (generations ago --BACKWARD)
+		defineConstant("g_sel_start", 100);
+	if (!exists("slim_total_generations")) // time of simulation ended
+		defineConstant("slim_total_generations", max(g_sel_start, g_ne_change_start)+1);
+	if (!exists("u"))
+		//defineConstant("u", 2.5e-8);
+		defineConstant("u", 0.0); //neutral mutations are added with msprime.mutate, here set to zero.
+	if (!exists("r"))
+		defineConstant("r", 6.7e-7);
+	if (!exists("outid")) // output id
+		defineConstant("outid", 1);
+	if (!exists("max_restart")) // max_restart
+		defineConstant("max_restart", 100);
+		
+	if(!exists("sim_relatedness")) defineConstant('sim_relatedness', T);
+	
+	// print out paramter received
+	catn("// ================================================");
+	catn(c("Parameter", "L", L), sep='\t');
+	catn(c("Parameter", "ne_scale", ne_rescale), sep='\t');
+	catn(c("Parameter", "N", N), sep='\t');
+	catn(c("Parameter", "N0", N0), sep='\t');
+	catn(c("Parameter", "g_ne_change_start", g_ne_change_start), sep='\t');
+	catn(c("Parameter", "h", h), sep='\t');
+	catn(c("Parameter", "s", s), sep='\t');
+	catn(c("Parameter", "g_sel_start", g_sel_start), sep='\t');
+	catn(c("Parameter", "slim_total_generations", slim_total_generations), sep='\t');
+	catn(c("Parameter", "u", u), sep='\t');
+	catn(c("Parameter", "r", r), sep='\t');
+	catn(c("Parameter", "outid", outid), sep='\t');
+	catn("// ================================================");
+	
+	// Scaled constants. Ne scale down, T scale down, Rates scale up
+	defineConstant("re_N", asInteger(N * ne_rescale));
+	defineConstant("re_N0", asInteger(N0 * ne_rescale));
+	defineConstant("re_g_ne_change_start", asInteger(g_ne_change_start * ne_rescale));
+	defineConstant("re_s", s / ne_rescale);
+	defineConstant("re_u", u / ne_rescale);
+	defineConstant("re_r", r / ne_rescale);
+	defineConstant("re_g_sel_start", asInteger(g_sel_start * ne_rescale));
+	defineConstant("re_slim_total_generations", asInteger(slim_total_generations * ne_rescale));
+	
+	initializeSLiMOptions(keepPedigrees = T);	
+	initializeTreeSeq();
+	initializeMutationRate(re_u);
+	initializeMutationType("m1", 0.5, "f", 0.0); // neutral
+	
+	//m1.mutationStackPolicy = 'l';
+	initializeMutationType("m2", h, "f", s); // balanced
+	initializeGenomicElementType("g1", m1, 1);
+	initializeGenomicElement(g1, 0, L - 1);
+	initializeRecombinationRate(re_r);
+	
+	// define global
+	defineGlobal("restart_counter", 1);
+}
+
+// Trick: only run modifyChild in the last twenty generations so its much faster
+s0 :10 modifyChild() {
+   if (!sim_relatedness ) return T; // normal simulation or old generations, always return T
+
+   // use this to let 50% of candicate pass without checking pedegree relatedness
+   // so the Ne etimates are more stable
+   if(child.index % 3 == 0) return T;
+   
+   prob = parent1.relatedness(parent2);
+   if ((prob>1.0 / 32) & (prob<1.0 / 4)) return T; 
+   // for unrelated samples return True with a small probability
+   else return sample(c(T, F), size=1, replace=T, weights=c(1, 999));  
+	 
+}
+
+1 early()
+{
+	sim.addSubpop("p1", re_N);
+	community.rescheduleScriptBlock(s0, re_slim_total_generations - 100 + 1);
+	community.rescheduleScriptBlock(s1, re_slim_total_generations - re_g_ne_change_start + 1);
+	community.rescheduleScriptBlock(s2, re_slim_total_generations - re_g_sel_start - 1, re_slim_total_generations); // minus 1 so that it allows the s2 code block the save the state
+	community.rescheduleScriptBlock(s3, re_slim_total_generations+1, re_slim_total_generations+1);
+	print(re_slim_total_generations);
+}
+
+// control populatio size
+s1 300: early()
+{
+	t = re_slim_total_generations - sim.cycle; // generation ago
+	Nt = (re_N/re_N0)^(t/re_g_ne_change_start) * N0; // calculate Nt
+	p1.setSubpopulationSize(asInteger(Nt)); // set new population size
+}
+
+// condition on selection establishment (not lost)
+s2 450: late()
+{
+	if (sim.cycle == re_slim_total_generations - re_g_sel_start -1  & s != 0.0)
+	{
+		sim.treeSeqOutput(paste("tmp_slim_out_", outid, "_state.trees", sep=''));
+		print(c('saved state:', paste("tmp_slim_out_", outid, "_state.trees", sep='')));
+		sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
+	}
+	else if (sim.cycle >= re_slim_total_generations - re_g_sel_start & s != 0)
+	{
+		mut = sim.mutationsOfType(m2);
+		fixed = sum(sim.substitutions.mutationType == m2);
+		need_restart = 0;
+		if (fixed) {
+			print("selected mutation fixed");
+			catn(c("DAF", slim_total_generations - sim.cycle, 1.0), sep='\t');
+			community.deregisterScriptBlock(self);
+		}
+		else if ((mut.size() != 1) & restart_counter < max_restart)
+		{
+			print("selected mutation lost; restarting...");
+			sim.readFromPopulationFile(paste("tmp_slim_out_", outid, "_state.trees", sep=''));
+			setSeed(rdunif(1, 0, asInteger(2^62 - 1)));
+			sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
+			restart_counter = restart_counter + 1;
+		}
+		else {
+			catn(c("DAF", slim_total_generations - sim.cycle, sim.mutationFrequencies(p1, mut)), sep='\t');
+		}
+
+	}
+}
+
+s3 500 late()
+{
+	sim.simulationFinished();
+	catn(c("restart_counter", restart_counter), sep='\t');
+	sim.treeSeqOutput(paste("tmp_slim_out_", outid, ".trees", sep=''));
+}
+late() {
+	if(sim.cycle<slim_total_generations)
+		catn(c('True_Ne', slim_total_generations - sim.cycle - 1, p1.individualCount), sep='\t');
+}
+
