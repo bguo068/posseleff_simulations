@@ -1,0 +1,6 @@
+[submodule "modules/tskibd"]
+	path = modules/tskibd
+	url = git@github.com:bguo068/tskibd.git
+[submodule "modules/ibdutils"]
+	path = modules/ibdutils
+	url = git@github.com:bguo068/ibdutils.git
