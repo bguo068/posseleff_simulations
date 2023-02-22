@@ -15,29 +15,85 @@ from pathlib import Path
 import sys
 import gzip
 import json
+from ibdutils.utils.others import CheckableParams
 
 slim_script_dir = Path(__file__).parents[1] / "slim"
+
+
+class SimParams(CheckableParams):
+    def __init__(self) -> None:
+        self.chrno = 1
+        self.seqlen = 100 * 15_000
+        self.selpos = int(0.33 * 100 * 15_000)
+        self.num_origins = 1
+        self.N = 10000
+        self.h = 0.5
+        self.s = 0.3
+        self.g_sel_start = 80
+        self.r = 0.01 / 15_000
+        self.sim_relatedness = 0
+        #
+        self.g_ne_change_start = 200
+        self.N0 = 3000
+        self.u = 1e-8
+        self.nsam = 100
+        self.slim_script = str(slim_script_dir / "single_pop.slim")
+
+        # save values to  __defaults__ and clear above attributes
+        super().__init__()
+
+    def prepare_args(self):
+        d = self.__defaults__
+        p = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+        p.add_argument("--chrno", type=int, default=d["chrno"])
+        p.add_argument("--seqlen", type=int, default=d["seqlen"])
+        p.add_argument("--selpos", type=float, default=d["selpos"])
+        p.add_argument("--num_origins", type=int, default=d["num_origins"])
+        p.add_argument("--N", type=int, default=d["N"])
+        p.add_argument("--s", type=float, default=d["s"])
+        p.add_argument("--h", type=float, default=d["h"])
+        p.add_argument("--g_sel_start", type=int, default=d["g_sel_start"])
+        p.add_argument("--r", type=float, default=d["r"])
+        p.add_argument(
+            "--sim_relatedness", type=int, choices=[0, 1], default=d["sim_relatedness"]
+        )
+        p.add_argument("--g_ne_change_start", type=int, default=d["g_ne_change_start"])
+        p.add_argument("--N0", type=int, default=d["N0"])
+        p.add_argument("--u", type=float, default=d["u"])
+        p.add_argument("--nsam", type=int, default=d["nsam"])
+
+        # extra arguments
+        p.add_argument(
+            "--test",
+            action="store_true",
+            dest="test",
+            help="when this is set, nsam values is replaced with 50 and seqlen with 100cM for quick testing",
+        )
+        p.add_argument("--genome_set_id", type=int, required=True)
+
+        args = p.parse_args()
+
+        # if test using a small number for nsam and seqlen
+        if args.test:
+            args.nsam = 50
+            args.seqlen = 20 * int(0.01 / args.r)
+            args.selpos = args.seqlen // 3
+
+        # save to params
+        for k, v in vars(args).items():
+            if k not in ["test", "genome_set_id"]:
+                self.__setattr__(k, v)
+        self.fill_defaults()
+
+        return args
 
 
 class SlimMsprimeSimulatorForSinglePop:
     def __init__(
         self,
-        chrno=1,
-        seqlen=100 * 15_000,
-        selpos=None,
-        num_origins=1,
-        N=10000,
-        h=0.5,
-        s=0.2,
-        g_sel_start=80,
-        r=0.01 / 15_000,
-        sim_relatedness=0,
-        #
-        ne_change_g=200,
-        N0=3000,
-        u=1e-8,
-        nsam=100,
-        slim_script=str(slim_script_dir / "single_pop.slim"),
+        params: SimParams,
     ):
         """
         init simulation parameters
@@ -45,49 +101,31 @@ class SlimMsprimeSimulatorForSinglePop:
         # pyslim doc: https://tskit.dev/pyslim/docs/stable/introduction.html
 
         """
-        local_dict = {k: v for k, v in locals().items() if k != "self"}
-        with open(f"config_{chrno}.json", "w") as fp:
-            json.dump(local_dict, fp)
-        self.chrno = chrno
-        self.seqlen = int(seqlen)
-        self.selpos = int(seqlen // 2 if selpos is None else selpos)
-        self.num_origins = num_origins
-        self.N = N
-        self.h = h
-        self.s = s
-        self.g_sel_start = g_sel_start
-        self.r = r
-        self.sim_relatedness = sim_relatedness
-
-        self.ne_change_g = ne_change_g
-        self.N0 = N0
-        self.u = u
-        self.nsam = nsam
-        self.slim_script = slim_script
-        assert self.nsam // 2 <= self.N0
+        self.params = params
+        assert self.params.nsam // 2 <= self.params.N0
 
     def _run_slim(self, idx, slim_seed) -> str:
         outid = idx
 
         # run slim
         slim_params = {
-            "L": self.seqlen,
-            "selpos": self.selpos,
-            "num_origins": self.num_origins,
-            "N": self.N,
-            "h": self.h,
-            "s": self.s,
-            "g_sel_start": self.g_sel_start,
-            "r": self.r,
+            "L": self.params.seqlen,
+            "selpos": self.params.selpos,
+            "num_origins": self.params.num_origins,
+            "N": self.params.N,
+            "h": self.params.h,
+            "s": self.params.s,
+            "g_sel_start": self.params.g_sel_start,
+            "r": self.params.r,
             "outid": outid,
             "max_restart": 100,
-            "sim_relatedness": self.sim_relatedness,
-            "N0": self.N0,
-            "g_ne_change_start": self.ne_change_g,
+            "sim_relatedness": self.params.sim_relatedness,
+            "N0": self.params.N0,
+            "g_ne_change_start": self.params.g_ne_change_start,
         }
         slim_params_str = " ".join([f"-d {k}={v}" for k, v in slim_params.items()])
         seed_str = f"-seed {slim_seed}" if slim_seed is not None else ""
-        cmd = f"slim {slim_params_str} {seed_str} {self.slim_script}"
+        cmd = f"slim {slim_params_str} {seed_str} {self.params.slim_script}"
         print(f"simulate chrom with id {outid}")
         print(cmd)
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -142,7 +180,7 @@ class SlimMsprimeSimulatorForSinglePop:
 
         # simplify slim trees but keep roots
         alive_inds = pyslim.individuals_alive_at(ts, 0)
-        keep_inds = np.random.choice(alive_inds, self.nsam // 2, replace=False)
+        keep_inds = np.random.choice(alive_inds, self.params.nsam // 2, replace=False)
         keep_nodes = []
         for i in keep_inds:
             keep_nodes.extend(ts.individual(i).nodes)
@@ -152,8 +190,8 @@ class SlimMsprimeSimulatorForSinglePop:
         # recpaitate (finish coalescent)
         rts: tskit.TreeSequence = pyslim.recapitate(
             sts,
-            ancestral_Ne=self.N,
-            recombination_rate=self.r,
+            ancestral_Ne=self.params.N,
+            recombination_rate=self.params.r,
             random_seed=recapitate_seed,
         )
 
@@ -171,7 +209,7 @@ class SlimMsprimeSimulatorForSinglePop:
         # mutate
         mts = msprime.sim_mutations(
             ts,
-            rate=self.u,
+            rate=self.params.u,
             model=msprime.SLiMMutationModel(type=0),
             keep=True,
         )
@@ -233,88 +271,12 @@ def write_peudo_homozygous_vcf(ts_mutated, chrno, out_vcf):
         df.to_csv(f, sep="\t", header=True, index=False)
 
 
-def prepare_args():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    parser.add_argument("--chrno", type=int, default=1, help="chromosome number")
-    parser.add_argument("--s", type=float, default=0.3, help="selection coefficient")
-    parser.add_argument("--h", type=float, default=0.5, help="dominance coefficient")
-    parser.add_argument("--selpos_0_1", type=float, default=0.33, help="selpos: 0~1")
-    parser.add_argument("--num_origins", type=int, default=1, help="dac under sel")
-    parser.add_argument("--g_sel_start", type=int, default=80, help="selStartG")
-    parser.add_argument("--u", type=float, default=1e-8, help="only sim anc, u ignored")
-    parser.add_argument(
-        "--bp_per_cm", type=int, default=15000, help="r = 0.01/bp_per_cm"
-    )
-    parser.add_argument("--seqlen_in_cm", type=int, default=100, help="chrlen in cM")
-    parser.add_argument(
-        "--ne_change_start_g", type=int, default=200, help="Ne change time in gen ago)"
-    )
-    parser.add_argument("--N", type=int, default=10000, help="ancient Ne")
-    parser.add_argument("--N0", type=int, default=10000, help="Ne at present")
-    parser.add_argument("--nsam", type=int, default=1000, help="no. hap sampled")
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        dest="test",
-        help="when this is set, nsam values is replaced with 50 and seqlen with 100cM for quick testing",
-    )
-    parser.add_argument(
-        "--sim_relatedness",
-        type=int,
-        choices=[0, 1],
-        default=0,
-        help="0: normal simulation; 1: simulate highly related",
-    )
-    parser.add_argument("--genome_set_id", type=int, required=True)
-
-    args = parser.parse_args()
-    print(args)
-
-    # parameters -- simulation
-    args.r = 0.01 / args.bp_per_cm
-    args.seqlen = args.seqlen_in_cm * args.bp_per_cm
-
-    # parameters -- find true ibd
-    # args.min_cm = 2.0
-    # args.sample_window = int(0.01 * args.bp_per_cm)
-    # args.min_bp = args.min_cm * args.bp_per_cm
-    # args.remove_hbd = True
-    # args.min_tmrca = 1.5
-    # args.out_ibd = f"{args.chrno}.ibd"
-
-    # if test using a small number for nsam and seqlen
-    if args.test:
-        args.nsam = 50
-        args.seqlen = 20 * args.bp_per_cm
-
-    args.selpos_bp = args.seqlen * args.selpos_0_1
-
-    return args
-
-
 if __name__ == "__main__":
-    args = prepare_args()
+    params = SimParams()
+    args = params.prepare_args()
 
     # setting parameters for simulator wrapper
-    simulator = SlimMsprimeSimulatorForSinglePop(
-        chrno=args.chrno,
-        seqlen=args.seqlen,
-        selpos=args.selpos_bp,
-        num_origins=args.num_origins,
-        N=args.N,
-        h=args.h,
-        s=args.s,
-        g_sel_start=args.g_sel_start,
-        r=args.r,
-        sim_relatedness=args.sim_relatedness,
-        #
-        ne_change_g=args.ne_change_start_g,
-        N0=args.N0,
-        u=args.u,
-        nsam=args.nsam,
-    )
+    simulator = SlimMsprimeSimulatorForSinglePop(params)
 
     # first do slim simulation and tree sequence recording, then using
     # msprime/pyslim to recapitate (finish coalescence)

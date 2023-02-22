@@ -13,9 +13,9 @@ import pandas as pd
 import io
 import sys
 import logging
-import json
 from pathlib import Path
 import gzip
+from ibdutils.utils.others import CheckableParams
 
 slim_script_dir = Path(__file__).parents[1] / "slim"
 
@@ -26,75 +26,103 @@ slim_script_dir = Path(__file__).parents[1] / "slim"
 # 2. geneic sweeps model only allows for single population and constant size
 
 
-class SlimMsprimeSimulatorForMultiplePop:
-    def __init__(
-        self,
-        chrno=1,
-        seqlen=100 % 15000,
-        selpos=None,
-        num_origins=1,
-        N=10000,
-        h=0.5,
-        s=0.2,
-        g_sel_start=80,
-        r=0.01 / 15_000,
-        sim_relatedness=False,
+class SimParams(CheckableParams):
+    def __init__(self) -> None:
+        self.chrno = 1
+        self.seqlen = 100 * 15000
+        self.selpos = int(100 * 15000 * 0.33)
+        self.num_origins = 1
+        self.N = 10000
+        self.h = 0.5
+        self.s = 0.2
+        self.g_sel_start = 80
+        self.r = 0.01 / 15_000
+        self.sim_relatedness = 0
         #
-        mig=1e-5,
-        sel_mig=0.01,
-        npop=5,
-        nsam=[100, 100, 100, 100, 100],
-        Tsplit=500,
-        u=1e-8,
-        slim_script=str(slim_script_dir / "multiple_pop.slim"),
-    ):
-        local_dict = {k: v for k, v in locals().items() if k != "self"}
-        with open(f"config_{chrno}.json", "w") as fp:
-            json.dump(local_dict, fp)
+        self.mig = 1e-5
+        self.sel_mig = 0.01
+        self.npop = 5
+        self.nsam = 100
+        self.Tsplit = 500
+        self.u = 1e-8
+        self.slim_script = str(slim_script_dir / "multiple_pop.slim")
 
-        # parameters
-        self.chrno = chrno
-        self.seqlen = seqlen
-        self.selpos = int(seqlen // 2 if selpos is None else selpos)
-        self.num_origins = num_origins
-        self.N = N
-        self.h = h
-        self.s = s
-        self.g_sel_start = g_sel_start
-        self.r = r
-        self.sim_relatedness = "T" if sim_relatedness else "F"
+        # save values to  __defaults__ and clear above attributes
+        super().__init__()
 
-        self.mig = mig
-        self.sel_mig = sel_mig
-        self.npop = npop
-        self.nsam = nsam
-        self.Tsplit = Tsplit
-        self.u = u
-        self.slim_script = slim_script
+    def prepare_args(self):
+        d = self.__defaults__
+        p = argparse.ArgumentParser(
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+
+        p.add_argument("--chrno", type=int, default=d["chrno"])
+        p.add_argument("--seqlen", type=int, default=d["seqlen"])
+        p.add_argument("--selpos", type=float, default=d["selpos"])
+        p.add_argument("--num_origins", type=int, default=d["num_origins"])
+        p.add_argument("--h", type=float, default=d["h"])
+        p.add_argument("--s", type=float, default=d["s"])
+        p.add_argument("--N", type=int, default=d["N"])
+        p.add_argument("--g_sel_start", type=int, default=d["g_sel_start"])
+        p.add_argument(
+            "--sim_relatedness", choices=[0, 1], default=d["sim_relatedness"]
+        )
+        p.add_argument("--r", type=float, default=d["r"])
+
+        p.add_argument("--mig", type=float, default=d["mig"])
+        p.add_argument("--sel_mig", type=float, default=d["sel_mig"])
+        p.add_argument("--npop", type=int, default=d["npop"])
+        p.add_argument("--nsam", type=int, default=d["nsam"])
+        p.add_argument("--Tsplit", type=int, default=d["Tsplit"])
+        p.add_argument("--u", type=float, default=d["u"])
+
+        p.add_argument("--test", action="store_true", default=False)
+        p.add_argument("--genome_set_id", type=int, required=True)
+
+        args = p.parse_args()
+
+        # if test using a small number for nsam and seqlen
+        if args.test:
+            args.nsam = 50
+            args.seqlen = 20 * int(0.01 / args.r)
+            args.selpos = args.seqlen // 3
+
+        # save to params
+        for k, v in vars(args).items():
+            if k not in ["test", "genome_set_id"]:
+                self.__setattr__(k, v)
+        self.fill_defaults()
+
+        return args
+
+
+class SlimMsprimeSimulatorForMultiplePop:
+    def __init__(self, params: SimParams):
+        self.params = params
 
     def _run_slim(self, idx, slim_seed):
         outid = idx
 
         # params dict
         slim_params = dict(
-            L=self.seqlen,
-            selpos=self.selpos,
-            sim_relatedness=self.sim_relatedness,
-            num_origins=self.num_origins,
-            N=self.N,
-            h=self.h,
-            s=self.s,
-            g_sel_start=self.g_sel_start,
-            r=self.r,
+            L=self.params.seqlen,
+            selpos=self.params.selpos,
+            sim_relatedness=self.params.sim_relatedness,
+            num_origins=self.params.num_origins,
+            N=self.params.N,
+            h=self.params.h,
+            s=self.params.s,
+            g_sel_start=self.params.g_sel_start,
+            r=self.params.r,
             outid=outid,
             max_restart=100,
-            npop=self.npop,
-            sel_mig=self.sel_mig,
+            npop=self.params.npop,
+            sel_mig=self.params.sel_mig,
         )
 
         slim_params_str = " ".join([f"-d {k}={v}" for k, v in slim_params.items()])
         seed_str = f"-seed {slim_seed}" if slim_seed is not None else ""
-        cmd = f"slim {slim_params_str} {seed_str} {self.slim_script}"
+        cmd = f"slim {slim_params_str} {seed_str} {self.params.slim_script}"
         print(f"simulate chrom with id {outid}")
         print(cmd)
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -111,7 +139,7 @@ class SlimMsprimeSimulatorForMultiplePop:
 
         daf_header_str = "\t".join(
             ["Type", "RestartCount", "GEN"]
-            + [f"DAF{i+1}" for i in range(1, self.npop + 1)]
+            + [f"DAF{i+1}" for i in range(1, self.params.npop + 1)]
         )
         daf_list = [daf_header_str]
 
@@ -149,10 +177,10 @@ class SlimMsprimeSimulatorForMultiplePop:
 
         # sample nodes from each population at t = 0
         sample_nodes = []
-        for pop in range(1, self.npop + 1):
+        for pop in range(1, self.params.npop + 1):
             ind_alive = pyslim.individuals_alive_at(orig_ts, 0, population=pop)
             sampled_ind = np.random.choice(
-                ind_alive, size=self.nsam[pop - 1], replace=False
+                ind_alive, size=self.params.nsam, replace=False
             )
             for i in sampled_ind:
                 sample_nodes.extend(orig_ts.individual(i).nodes)
@@ -168,27 +196,27 @@ class SlimMsprimeSimulatorForMultiplePop:
         for pop in demog.populations:
             if pop.name == "pop_0":
                 continue
-            pop.initial_size = self.N
+            pop.initial_size = self.params.N
             pop_names.append(pop.name)
 
         #       add ancestral population.
         demog.add_population(
             name="Ancestral",
-            initial_size=self.N,
+            initial_size=self.params.N,
             # the slim_id is required meta for slim generated tree
-            extra_metadata={"slim_id": self.npop + 1},
+            extra_metadata={"slim_id": self.params.npop + 1},
         )
 
         #       and migration events
         slim_time = orig_ts.metadata["SLiM"]["cycle"]
-        for i in range(1, self.npop):
+        for i in range(1, self.params.npop):
             demog.add_symmetric_migration_rate_change(
-                time=slim_time, populations=[f"p{i+1}", f"p{i}"], rate=self.mig
+                time=slim_time, populations=[f"p{i+1}", f"p{i}"], rate=self.params.mig
             )
 
         #       set population join event
         demog.add_population_split(
-            self.Tsplit, derived=pop_names, ancestral="Ancestral"
+            self.params.Tsplit, derived=pop_names, ancestral="Ancestral"
         )
         self.demog = demog
 
@@ -196,7 +224,7 @@ class SlimMsprimeSimulatorForMultiplePop:
         rts = pyslim.recapitate(
             sts,
             demography=demog,  # defined above for migration in the coalescent part
-            recombination_rate=self.r,
+            recombination_rate=self.params.r,
             random_seed=recapitate_seed,
         )
 
@@ -210,7 +238,7 @@ class SlimMsprimeSimulatorForMultiplePop:
         # mutate
         mts = msprime.sim_mutations(
             sts2,
-            rate=self.u,
+            rate=self.params.u,
             model=msprime.SLiMMutationModel(type=0),
             keep=True,
         )
@@ -285,77 +313,14 @@ def write_peudo_homozygous_vcf(ts_mutated, chrno, out_vcf):
         df.to_csv(f, sep="\t", header=True, index=False)
 
 
-def get_args():
-    p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    p.add_argument("--sim_relatedness", action="store_true", default=False)
-    p.add_argument("--test", action="store_true", default=False)
-
-    p.add_argument("--chrno", type=int, default=1, help="chromosome number")
-    p.add_argument("--s", type=float, default=0.3, help="selection coefficient")
-    p.add_argument("--h", type=float, default=0.5, help="dominance coefficient")
-    p.add_argument("--selpos_0_1", type=float, default=0.33, help="selpos: 0~1")
-    p.add_argument("--num_origins", type=int, default=1, help="dac under sel")
-    p.add_argument("--g_sel_start", type=int, default=80, help="selStartG")
-    p.add_argument("--u", type=float, default=1e-8, help="only sim anc, u ignored")
-    p.add_argument("--bp_per_cm", type=int, default=15000, help="r = 0.01/bp_per_cm")
-    p.add_argument("--seqlen_in_cm", type=int, default=100, help="chrlen in cM")
-    p.add_argument("--N", type=int, default=10000, help="ancient Ne")
-    p.add_argument("--nsam", type=int, default=100, help="no. hap sampled per subpop")
-    p.add_argument("--npop", type=int, default=5, help="the number of subpops")
-    p.add_argument(
-        "--sel_mig", type=float, help="migration rate during selection", default=0.01
-    )
-    p.add_argument(
-        "--mig", type=float, help="migration rate before selection", default=1e-5
-    )
-    p.add_argument("--Tsplit", type=int, default=500)
-    p.add_argument("--genome_set_id", type=int, required=True)
-
-    args = p.parse_args()
-
-    # parameters -- simulation
-    args.r = 0.01 / args.bp_per_cm
-    args.seqlen = args.seqlen_in_cm * args.bp_per_cm
-
-    # if test using a small number for nsam and seqlen
-    if args.test:
-        args.nsam = 50
-        args.seqlen = 20 * args.bp_per_cm
-
-    args.selpos_bp = args.seqlen * args.selpos_0_1
-    return args
-
-
 if __name__ == "__main__":
-    args = get_args()
+    params = SimParams()
+    args = params.prepare_args()
     print(args)
 
     logging.basicConfig(level=logging.INFO)
 
-    if args.test:
-        nsam = [30, 30, 30, 30, 30]
-        simulator = SlimMsprimeSimulatorForMultiplePop(
-            chrno=args.chrno, s=0.5, nsam=nsam, seqlen=10 * 15000
-        )
-    else:
-        simulator = SlimMsprimeSimulatorForMultiplePop(
-            chrno=args.chrno,
-            seqlen=args.seqlen,
-            selpos=args.selpos_bp,
-            num_origins=args.num_origins,
-            N=args.N,
-            h=args.h,
-            s=args.s,
-            g_sel_start=args.g_sel_start,
-            r=args.r,
-            sim_relatedness=args.sim_relatedness,
-            sel_mig=args.sel_mig,
-            mig=args.mig,
-            Tsplit=args.Tsplit,
-            u=args.u,
-            npop=args.npop,
-            nsam=[args.nsam] * args.npop,
-        )
+    simulator = SlimMsprimeSimulatorForMultiplePop(params)
 
     simulator.simulate_a_chromosome(
         idx=args.chrno,
