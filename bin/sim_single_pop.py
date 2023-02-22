@@ -14,6 +14,7 @@ import argparse
 from pathlib import Path
 import sys
 import gzip
+import json
 
 slim_script_dir = Path(__file__).parents[1] / "slim"
 
@@ -21,22 +22,22 @@ slim_script_dir = Path(__file__).parents[1] / "slim"
 class SlimMsprimeSimulatorForSinglePop:
     def __init__(
         self,
-        seqlen=50 * 15_000,
-        r=0.01 / 15_000,
-        u=1e-8,
+        chrno=1,
+        seqlen=100 * 15_000,
+        selpos=None,
+        num_origins=1,
         N=10000,
-        N0=3000,
-        ne_change_g=200,
-        nsam=100,
-        nrep=3,
         h=0.5,
         s=0.2,
-        selpos_bp=None,
-        mig_rate=0.00005,
-        s_start_g=50,
-        num_origins=1,
-        sim_related=0,
-        slim_script=slim_script_dir / "simple_directional_selection.slim",
+        g_sel_start=80,
+        r=0.01 / 15_000,
+        sim_relatedness=0,
+        #
+        ne_change_g=200,
+        N0=3000,
+        u=1e-8,
+        nsam=100,
+        slim_script=str(slim_script_dir / "single_pop.slim"),
     ):
         """
         init simulation parameters
@@ -44,43 +45,45 @@ class SlimMsprimeSimulatorForSinglePop:
         # pyslim doc: https://tskit.dev/pyslim/docs/stable/introduction.html
 
         """
+        local_dict = {k: v for k, v in locals().items() if k != "self"}
+        with open(f"config_{chrno}.json", "w") as fp:
+            json.dump(local_dict, fp)
+        self.chrno = chrno
         self.seqlen = int(seqlen)
-        self.r = r
-        self.u = u
+        self.selpos = int(seqlen // 2 if selpos is None else selpos)
+        self.num_origins = num_origins
         self.N = N
-        self.N0 = N0
-        self.ne_change_g = ne_change_g
-        self.nsam = nsam
-        self.nrep = nrep
         self.h = h
         self.s = s
-        self.selpos = int(seqlen // 2 if selpos_bp is None else selpos_bp)
-        self.mig_rate = mig_rate
-        self.msms_jar = ""
-        self.s_start_g = s_start_g
-        self.num_origins = num_origins
+        self.g_sel_start = g_sel_start
+        self.r = r
+        self.sim_relatedness = sim_relatedness
+
+        self.ne_change_g = ne_change_g
+        self.N0 = N0
+        self.u = u
+        self.nsam = nsam
         self.slim_script = slim_script
-        self.sim_related = sim_related
         assert self.nsam // 2 <= self.N0
 
-    def _run_slim(self, idx, slim_seed):
+    def _run_slim(self, idx, slim_seed) -> str:
         outid = idx
 
         # run slim
         slim_params = {
-            "sim_relatedness": self.sim_related,
             "L": self.seqlen,
             "selpos": self.selpos,
+            "num_origins": self.num_origins,
             "N": self.N,
-            "N0": self.N0,
-            "g_ne_change_start": self.ne_change_g,
             "h": self.h,
             "s": self.s,
-            "g_sel_start": self.s_start_g,
-            "u": 0,  # mutation is added ad-hoc by msprime.sim_mutation
+            "g_sel_start": self.g_sel_start,
             "r": self.r,
-            "num_origins": self.num_origins,
             "outid": outid,
+            "max_restart": 100,
+            "sim_relatedness": self.sim_relatedness,
+            "N0": self.N0,
+            "g_ne_change_start": self.ne_change_g,
         }
         slim_params_str = " ".join([f"-d {k}={v}" for k, v in slim_params.items()])
         seed_str = f"-seed {slim_seed}" if slim_seed is not None else ""
@@ -93,45 +96,46 @@ class SlimMsprimeSimulatorForSinglePop:
             sys.stderr.write(res.stderr)
             sys.exit(1)
 
-        # parse stdout to get true ne and restart_count
-        ne_lines = ["generation\ttrue_ne"]
-        daf_lines = ["generation\tderived_af"]
-        for line in res.stdout.split("\n"):
+        self.slim_stdout = res.stdout
+        self.slim_tree_fn = f"tmp_slim_out_single_pop_{outid}.trees"
+
+    def _parse_slim_stdout(self):
+        """parse stdout to get true ne and restart_count"""
+        ne_lines = ["GEN\tNE"]
+        daf_lines = ["GEN\tDAF"]
+        restart_count = 0
+        for line in self.slim_stdout:
             if line.startswith("restart_count"):
                 restart_count = int(line.split("\t")[1])
             elif line.startswith("True_Ne"):
                 ne_lines.append(line.replace("True_Ne\t", ""))
             elif line.startswith("DAF"):
                 daf_lines.append(line.replace("DAF\t", ""))
-        if not hasattr(self, "true_ne_df"):
-            self.true_ne_df = pd.read_csv(io.StringIO("\n".join(ne_lines)), sep="\t")
-            # Given slim could restart the selection process, need to
-            # remove duplicated true_ne and daf
-            self.true_ne_df.drop_duplicates("generation", keep="last", inplace=True)
 
+        self.true_ne_df = pd.read_csv(io.StringIO("\n".join(ne_lines)), sep="\t")
         self.daf_df = pd.read_csv(io.StringIO("\n".join(daf_lines)), sep="\t")
-        # Given slim could restart the selection process, need to
-        # remove duplicated true_ne and daf
+
+        # Given slim could have restarted the selection process, dedup is needed
         self.daf_df.drop_duplicates("generation", keep="last", inplace=True)
+        self.true_ne_df.drop_duplicates("generation", keep="last", inplace=True)
 
-        tree_fn = f"tmp_slim_out_{outid}.trees"
-
-        return tree_fn, restart_count
+        self.restart_count = restart_count
 
     def simulate_a_chromosome(
         self,
         idx,
-        rm_tree_files=False,
+        rm_slim_tree_files=False,
         slim_seed=None,
         recapitate_seed=None,
-    ) -> tuple[tskit.TreeSequence, int]:
+    ):
 
-        tree_fn, restart_count = self._run_slim(idx, slim_seed=slim_seed)
+        self._run_slim(idx, slim_seed=slim_seed)
+        self._parse_slim_stdout()
 
         # load slim trees
-        ts = tskit.load(tree_fn)
-        if rm_tree_files:
-            Path(tree_fn).unlink()
+        ts = tskit.load(self.slim_tree_fn)
+        if rm_slim_tree_files:
+            Path(self.slim_tree_fn).unlink()
 
         # suppress warning
         warnings.simplefilter("ignore", msprime.TimeUnitsMismatchWarning)
@@ -172,7 +176,8 @@ class SlimMsprimeSimulatorForSinglePop:
             keep=True,
         )
 
-        return mts, sts2, restart_count
+        self.mutated_trees = mts
+        self.simplified_trees = sts2
 
 
 def write_peudo_homozygous_vcf(ts_mutated, chrno, out_vcf):
@@ -233,11 +238,11 @@ def prepare_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--chrno", type=int, default=1, help="chromosome number")
-    parser.add_argument("--s", type=float, default=0.1, help="selection coefficient")
+    parser.add_argument("--s", type=float, default=0.3, help="selection coefficient")
     parser.add_argument("--h", type=float, default=0.5, help="dominance coefficient")
     parser.add_argument("--selpos_0_1", type=float, default=0.33, help="selpos: 0~1")
     parser.add_argument("--num_origins", type=int, default=1, help="dac under sel")
-    parser.add_argument("--s_start_g", type=int, default=50, help="selStartG")
+    parser.add_argument("--g_sel_start", type=int, default=80, help="selStartG")
     parser.add_argument("--u", type=float, default=1e-8, help="only sim anc, u ignored")
     parser.add_argument(
         "--bp_per_cm", type=int, default=15000, help="r = 0.01/bp_per_cm"
@@ -256,12 +261,14 @@ def prepare_args():
         help="when this is set, nsam values is replaced with 50 and seqlen with 100cM for quick testing",
     )
     parser.add_argument(
-        "--sim_related",
+        "--sim_relatedness",
         type=int,
         choices=[0, 1],
         default=0,
         help="0: normal simulation; 1: simulate highly related",
     )
+    parser.add_argument("--genome_set_id", type=int, required=True)
+
     args = parser.parse_args()
     print(args)
 
@@ -270,12 +277,12 @@ def prepare_args():
     args.seqlen = args.seqlen_in_cm * args.bp_per_cm
 
     # parameters -- find true ibd
-    args.min_cm = 2.0
-    args.sample_window = int(0.01 * args.bp_per_cm)
-    args.min_bp = args.min_cm * args.bp_per_cm
-    args.remove_hbd = True
-    args.min_tmrca = 1.5
-    args.out_ibd = f"{args.chrno}.ibd"
+    # args.min_cm = 2.0
+    # args.sample_window = int(0.01 * args.bp_per_cm)
+    # args.min_bp = args.min_cm * args.bp_per_cm
+    # args.remove_hbd = True
+    # args.min_tmrca = 1.5
+    # args.out_ibd = f"{args.chrno}.ibd"
 
     # if test using a small number for nsam and seqlen
     if args.test:
@@ -292,49 +299,52 @@ if __name__ == "__main__":
 
     # setting parameters for simulator wrapper
     simulator = SlimMsprimeSimulatorForSinglePop(
+        chrno=args.chrno,
         seqlen=args.seqlen,
-        r=args.r,
-        u=args.u,
+        selpos=args.selpos_bp,
+        num_origins=args.num_origins,
         N=args.N,
-        N0=args.N0,
-        ne_change_g=args.ne_change_start_g,
-        nsam=args.nsam,
-        nrep=1,
         h=args.h,
         s=args.s,
-        selpos_bp=args.selpos_bp,
-        s_start_g=args.s_start_g,
-        num_origins=args.num_origins,
-        sim_related=args.sim_related,
+        g_sel_start=args.g_sel_start,
+        r=args.r,
+        sim_relatedness=args.sim_relatedness,
+        #
+        ne_change_g=args.ne_change_start_g,
+        N0=args.N0,
+        u=args.u,
+        nsam=args.nsam,
     )
 
     # first do slim simulation and tree sequence recording, then using
     # msprime/pyslim to recapitate (finish coalescence)
-    mts, ts, slim_restart_count = simulator.simulate_a_chromosome(
+    simulator.simulate_a_chromosome(
         idx=args.chrno,
-        slim_seed=args.chrno,
-        recapitate_seed=args.chrno * args.chrno,
+        slim_seed=args.chrno + args.genome_set_id * 14,
+        recapitate_seed=args.chrno + args.genome_set_id * 14,
     )
 
     # output files
-    ofn_slim_restart_count = f"{args.chrno}.restart_count"
-    ofn_true_ne = f"{args.chrno}.true_ne"
-    ofn_daf = f"{args.chrno}.daf"
-    ofn_tree = f"{args.chrno}.trees"
-    ofn_vcf = f"{args.chrno}.vcf.gz"
+    prefix = f"{args.genome_set_id}_{args.chrno}"
+    ofn_slim_restart_count = f"{prefix}.restart_count"
+    ofn_true_ne = f"{prefix}.true_ne"
+    ofn_daf = f"{prefix}.daf"
+    ofn_tree = f"{prefix}.trees"
+    ofn_vcf = f"{prefix}.vcf.gz"
 
     # write files
-    Path(ofn_slim_restart_count).write_text(f"{slim_restart_count}")
+    Path(ofn_slim_restart_count).write_text(f"{simulator.restart_count}")
     simulator.true_ne_df.to_csv(ofn_true_ne, sep="\t", index=None)
     simulator.daf_df.to_csv(ofn_daf, index=None, sep="\t")
-    ts.dump(ofn_tree)  # tree before neutral mutations are added
-    write_peudo_homozygous_vcf(mts, args.chrno, ofn_vcf)
+    simulator.simplified_trees.dump(ofn_tree)  # tree before neutral mutations are added
+    write_peudo_homozygous_vcf(simulator.mutated_trees, args.chrno, ofn_vcf)
 
     print(
         f"""
     output files:
         {ofn_slim_restart_count}
-        {ofn_true_ne} 
+        {ofn_true_ne}
+        {ofn_daf}
         {ofn_tree}
         {ofn_vcf}
     """

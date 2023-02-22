@@ -1,0 +1,122 @@
+function (NULL) set_default(string k, lifs v) {
+	if(!exists(k)) defineConstant(k, v);
+	catn(c("Parameter", k, v), sep='\t');
+	return NULL;
+}
+
+initialize()
+{
+	set_default("L", 750000); // chromosome length in bp
+	set_default("selpos", asInteger(L / 3)); // selection position in bp
+	set_default("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
+	set_default("N", 10000); // ancient effective population size
+	set_default("h", 0.5);  // dominant coefficient
+	set_default("s", 0.3); // selection coefficient
+	set_default("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
+	set_default("r", 6.67e-7); // recombinantion rate
+	set_default("outid", 1); // idx
+	set_default("max_restart", 100); // max number of restart
+	set_default("sim_relatedness", F); // whether simulate high relatedness
+
+	set_default("N0", 1000); // the effective population size at sampling time
+	set_default("g_ne_change_start", 200); // Ne change time (generations ago -- BACKWARD)
+	set_default("slim_total_generations", // time of simulation ended -- forward
+		max(g_sel_start, g_ne_change_start + 1) );
+
+	initializeSLiMOptions(keepPedigrees=T);
+	initializeTreeSeq();
+	initializeMutationRate(0.0);
+	initializeMutationType("m1", 0.5, "f", 0.0); // neutral
+	initializeMutationType("m2", h, "f", s); // balanced
+	initializeGenomicElementType("g1", m1, 1);
+	initializeGenomicElement(g1, 0, L - 1);
+	initializeRecombinationRate(r);
+
+	// define global
+	defineGlobal("restart_counter", 1);
+}
+
+// Trick: only run modifyChild in the last twenty generations so its much faster
+s0:10 modifyChild()
+{
+	if (!sim_relatedness)
+		return T; // normal simulation or old generations, always return T
+
+	// use this to let 50% of candicate pass without checking pedegree relatedness
+	// so the Ne etimates are more stable
+	if (child.index % 3 == 0)
+		return T;
+	prob = parent1.relatedness(parent2);
+	if ((prob > 1.0 / 32) & (prob < 1.0 / 4))
+		return T;
+
+	// for unrelated samples return True with a small probability
+	else
+		return sample(c(T, F), size=1, replace=T, weights=c(1, 999));
+}
+
+1 early()
+{
+	sim.addSubpop("p1", N);
+	community.rescheduleScriptBlock(s0, slim_total_generations - 100 + 1);
+	community.rescheduleScriptBlock(s1, slim_total_generations - g_ne_change_start + 1);
+	community.rescheduleScriptBlock(s2, slim_total_generations - g_sel_start - 1, slim_total_generations); // minus 1 so that it allows the s2 code block the save the state
+	community.rescheduleScriptBlock(s3, slim_total_generations + 1, slim_total_generations + 1);
+	print(slim_total_generations);
+}
+
+// control populatio size
+s1 300: early()
+{
+	t = slim_total_generations - sim.cycle; // generation ago
+	Nt = (N / N0)^(t / g_ne_change_start) * N0; // calculate Nt
+	p1.setSubpopulationSize(asInteger(Nt)); // set new population size
+}
+
+// condition on selection establishment (not lost)
+s2 450: late()
+{
+	if (sim.cycle == slim_total_generations - g_sel_start - 1 & s != 0.0)
+	{
+		sim.treeSeqOutput(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
+		print(c('saved state:', paste("tmp_slim_state_single_pop_", outid, ".trees", sep='')));
+		sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
+	}
+	else if (sim.cycle >= slim_total_generations - g_sel_start & s != 0)
+	{
+		mut = sim.mutationsOfType(m2);
+		fixed = sum(sim.substitutions.mutationType == m2);
+		need_restart = 0;
+		if (fixed)
+		{
+			print("selected mutation fixed");
+			catn(c("DAF", slim_total_generations - sim.cycle, 1.0), sep='\t');
+			community.deregisterScriptBlock(self);
+		}
+		else if ((mut.size() != 1) & restart_counter < max_restart)
+		{
+			print("selected mutation lost; restarting...");
+			sim.readFromPopulationFile(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
+			setSeed(rdunif(1, 0, asInteger(2^62 - 1)));
+			sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
+			restart_counter = restart_counter + 1;
+		}
+		else
+		{
+			catn(c("DAF", slim_total_generations - sim.cycle, sim.mutationFrequencies(p1, mut)), sep='\t');
+		}
+	}
+}
+
+s3 500 late()
+{
+	sim.simulationFinished();
+	catn(c("restart_counter", restart_counter), sep='\t');
+	sim.treeSeqOutput(paste("tmp_slim_out_single_pop_", outid, ".trees", sep=''));
+}
+
+late()
+{
+	if (sim.cycle < slim_total_generations)
+		catn(c('True_Ne', slim_total_generations - sim.cycle - 1, p1.individualCount), sep='\t');
+}
