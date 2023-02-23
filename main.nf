@@ -19,7 +19,7 @@ def sp_defaults = [
     r : 0.01 / 15_000,
     sim_relatedness : 0,
     g_ne_change_start : 200,
-    N0 : 3000,
+    N0 : 1000,
     u : 1e-8,
     nsam : 100,
 ]

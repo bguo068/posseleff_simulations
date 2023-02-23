@@ -34,7 +34,7 @@ class SimParams(CheckableParams):
         self.sim_relatedness = 0
         #
         self.g_ne_change_start = 200
-        self.N0 = 3000
+        self.N0 = 1000
         self.u = 1e-8
         self.nsam = 100
         self.slim_script = str(slim_script_dir / "single_pop.slim")
