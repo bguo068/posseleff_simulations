@@ -65,7 +65,7 @@ class SimParams(CheckableParams):
         p.add_argument("--N", type=int, default=d["N"])
         p.add_argument("--g_sel_start", type=int, default=d["g_sel_start"])
         p.add_argument(
-            "--sim_relatedness", choices=[0, 1], default=d["sim_relatedness"]
+            "--sim_relatedness", choices=[0, 1], type=int, default=d["sim_relatedness"]
         )
         p.add_argument("--r", type=float, default=d["r"])
 

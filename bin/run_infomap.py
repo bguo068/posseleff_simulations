@@ -13,7 +13,13 @@ def parse_args():
     p.add_argument("--nsam", type=int, required=True)
     p.add_argument("--genome_set_id", type=int, required=True)
     p.add_argument("--ntrails", type=int, default=1000)
-    p.add_argument("--transform", choices=["square", "cube", None], default="square")
+    p.add_argument(
+        "--transform", type=str, choices=["square", "cube", "none"], default="square"
+    )
+    args = p.parse_args()
+    if args.transform == "none":
+        args.transform = None
+
     return p.parse_args()
 
 

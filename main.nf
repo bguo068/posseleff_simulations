@@ -2,6 +2,10 @@
 
 nextflow.enable.dsl = 2
 
+params.ifm_transform = ["square", "cube", "none"][0]
+params.ifm_ntrails = 1000
+params.test = false
+
 def sp_defaults = [
     seqlen : 100 * 15000,
     selpos : Math.round(0.33 * 100 * 15000),
@@ -81,6 +85,30 @@ process SIM_SP_CHR {
     """
 }
 
+process SIM_MP_CHR {
+    input:
+    tuple val(label), val(chrno), val(args)
+
+    output:
+    tuple val(label), val(chrno), path("*.trees"), path("*.vcf.gz"), emit: trees_vcf
+    tuple val(label), val(chrno), path("*.daf"), emit: daf
+    tuple val(label), val(chrno), path("*.restart_count"), emit: restart_count
+    tuple val(label), val(chrno), path("*_demog.png"), emit: demog
+
+    script:
+    def args_chr = (args + [chrno: chrno]).collect{k, v-> "--${k} ${v}"}.join(" ")
+    """
+    sim_multiple_pop.py $args_chr
+
+    mkdir tmp; mv tmp_* tmp/
+    """
+    stub:
+    def prefix="${args.genome_set_id}_${chrno}"
+    """
+    touch ${prefix}{.trees,.vcf.gz,.daf,.restart_count,_demog.png}
+    """
+}
+
 process CALL_IBD {
     input: 
         tuple val(label), val(chrno), val(args),  path(trees), path(vcf)
@@ -132,6 +160,26 @@ process PROC_DIST_NE {
     """
 }
 
+process PROC_INFOMAP {
+    input:
+        tuple val(label), path(ibd_lst), val(genome_set_id)
+    output:
+        tuple val(label), path("*_ifm_orig_ibd.pq"), emit: ifm_orig_ibd_pq
+        tuple val(label), path("*_ifm_rmpeaks_ibd.pq"), emit: ifm_rmpeaks_ibd_pq
+    script:
+    def args_local = [
+        ibd_files: "${ibd_lst}", // path is a blank separate list
+        genome_set_id: genome_set_id,
+    ].collect{k, v-> "--${k} ${v}"}.join(" ")
+    """
+    proc_infomap.py ${args_local}
+    """
+    stub:
+    """
+    touch ${genome_set_id}{_ifm_orig_ibd.pq,_ifm_rmpeaks_ibd.pq}
+    """
+}
+
 process RUN_IBDNE {
     input:
         tuple val(label), path(ibdne_jar), path(ibdne_sh), path(gmap), path(ibd_gz), \
@@ -149,6 +197,29 @@ process RUN_IBDNE {
     """
 }
 
+process RUN_INFOMAP {
+    input:
+        tuple val(label), path(ibd_pq), val(are_peaks_removed), val(args)
+    output:
+        tuple val(label), val(are_peaks_removed), path("*_member.pq")
+    script:
+    def args_local = [
+        ibd_pq: ibd_pq,
+        npop: args.npop,
+        nsam: args.nsam,
+        genome_set_id: args.genome_set_id,
+        ntrails: params.ifm_ntrails,
+        transform: params.ifm_transform,
+    ].collect{k, v-> "--${k} ${v}"}.join(" ")
+    """
+    run_infomap.py ${args_local}
+    """
+    stub:
+    """
+    touch ${args.genome_set_id}_member.pq
+    """
+}
+
 
 
 workflow WF_SP {
@@ -156,11 +227,6 @@ workflow WF_SP {
 
     println("\n\n------------- Single Population Sets-------------")
     sp_sets.each{k, v -> println("${k}\t\t${v}")}
-
-    
-    println("\n\n------------- Multiple Population Sets-------------")
-    mp_sets.each{k, v -> println("${k}\t\t${v}")}
-
 
 
     // SIMULATE chromosomes
@@ -217,8 +283,66 @@ workflow WF_SP {
 
 
 workflow WF_MP {
+    // SIMULATION SETS
+    
+    println("\n\n------------- Multiple Population Sets-------------")
+    mp_sets.each{k, v -> println("${k}\t\t${v}")}
+
+
+
+    // SIMULATE chromosomes
+    chr_chrno = channel.from(1..14)
+    ch_mp_params = channel.from(mp_sets.collect{k, v-> [k, v]})
+
+    if (params.test) {
+        ch_mp_params = ch_mp_params.first().map{
+            label, args -> def args2 = args + [nsam:50, npop:2, N:500]; [label, args2]
+        }
+    }
+
+    SIM_MP_CHR(ch_mp_params.combine(chr_chrno).map{a,b,c->[a,c,b]})
+    // SIM_MP_CHR.out.trees_vcf.view{it-> 
+    //    "${it[0]}\t${it[1]}\t${it[2].getName()}\t${it[3].getName()}"}
+
+
+
+    // CALL IBD segment per chromosome
+    CALL_IBD(SIM_MP_CHR.out.trees_vcf.combine(ch_mp_params, by:0)
+        .map{label,chrno,trees,vcf,args-> [label,chrno, args, trees, vcf]}
+    )
+    // CALL_IBD.out.tskibd.view{label, chrno, ibd -> [label, chrno, ibd.getName()]}
+
+
+
+    // COLLECT PER SETS
+    ch_ibd_per_genome = CALL_IBD.out.tskibd
+        .map{ label, chrno, ibd -> [groupKey(label, 14), [chrno, ibd]] }
+        .groupTuple(by:0, sort: {x,y-> x[0]<=>y[0] })
+        .combine(ch_mp_params, by:0)
+        .map{label, ll, args-> [label, ll.collect{it[1]}, args.genome_set_id]}
+
+    // ch_ibd_per_genome.view{label, trees_lst, genome_set_id->
+    //        [label, trees_lst.collect{it.getName()}, genome_set_id]}
+
+
+    // Process IBD for ibd distribution and ne analyses
+    PROC_INFOMAP(ch_ibd_per_genome)
+    
+    // PROC_INFOMAP.out.ifm_orig_ibd_pq.view{label, ibdpq -> [label, ibdpq.getName()]}
+
+
+    // RUN INFOMAP
+    RUN_INFOMAP(
+        PROC_INFOMAP.out.ifm_orig_ibd_pq.map{it -> it + false}.combine(ch_mp_params, by:0).concat(
+            PROC_INFOMAP.out.ifm_rmpeaks_ibd_pq.map{it -> it + true}.combine(ch_mp_params, by:0)
+        )
+    )
+
+    // RUN_INFOMAP.out.view{label, yns, member -> [label, yns, member.getName()]}
+
 }
 
 workflow {
     WF_SP()
+    WF_MP()
 }

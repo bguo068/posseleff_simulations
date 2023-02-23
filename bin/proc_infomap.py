@@ -35,4 +35,4 @@ ibd2 = ibd.duplicate("rmpeak")
 ibd2.remove_peaks()
 
 ibd._df.to_parquet(ofs_ifm_orig_ibd_pq)
-ibd2._df.to_parquet(ofs_ifm_orig_ibd_pq)
+ibd2._df.to_parquet(ofs_ifm_rmpeaks_ibd_pq)
