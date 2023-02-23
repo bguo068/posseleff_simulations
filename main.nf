@@ -5,6 +5,8 @@ nextflow.enable.dsl = 2
 params.ifm_transform = ["square", "cube", "none"][0]
 params.ifm_ntrails = 1000
 params.test = false
+params.resdir = "res"
+def resdir = params.resdir
 
 def sp_defaults = [
     seqlen : 100 * 15000,
@@ -62,6 +64,12 @@ def mp_sets = [
 
 
 process SIM_SP_CHR {
+    publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/daf/", pattern: "*.daf", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/restart_count/", pattern: "*.restart_count", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/true_ne/", pattern: "*.true_ne", mode: 'symlink'
+
     input: 
     tuple val(label), val(chrno), val(args)
 
@@ -86,6 +94,12 @@ process SIM_SP_CHR {
 }
 
 process SIM_MP_CHR {
+    publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/restart_count/", pattern: "*.restart_count", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/daf/", pattern: "*.daf", mode: 'symlink'
+    publishDir "${resdir}/${args.genome_set_id}_${label}/demog/", pattern: "*_demog.png", mode: 'symlink'
+
     input:
     tuple val(label), val(chrno), val(args)
 
@@ -110,6 +124,8 @@ process SIM_MP_CHR {
 }
 
 process CALL_IBD {
+    publishDir "${resdir}/${args.genome_set_id}_${label}/tskibd/", pattern: "*_tskibd.ibd", mode: 'symlink'
+
     input: 
         tuple val(label), val(chrno), val(args),  path(trees), path(vcf)
     output:
@@ -135,6 +151,10 @@ process CALL_IBD {
 }
 
 process PROC_DIST_NE {
+    publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.sh", mode: 'symlink'
+    publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.map", mode: 'symlink'
+    publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.ibd.gz", mode: 'symlink'
+
     input:
         tuple val(label), path(ibd_lst), val(genome_set_id)
     output:
@@ -161,6 +181,8 @@ process PROC_DIST_NE {
 }
 
 process PROC_INFOMAP {
+    publishDir "${resdir}/${genome_set_id}_${label}/ifm_input/", pattern: "*_ibd.pq", mode: 'symlink'
+
     input:
         tuple val(label), path(ibd_lst), val(genome_set_id)
     output:
@@ -181,6 +203,8 @@ process PROC_INFOMAP {
 }
 
 process RUN_IBDNE {
+    publishDir "${resdir}/${args.genome_set_id}_${label}/ne_output/",  mode: 'symlink'
+
     input:
         tuple val(label), path(ibdne_jar), path(ibdne_sh), path(gmap), path(ibd_gz), \
             val(are_peaks_removed), val(args)
@@ -193,11 +217,12 @@ process RUN_IBDNE {
     stub:
     def src = are_peaks_removed ? "rmpeaks": "orig"
     """
-    touch ${args}_${src}.ne
+    touch ${args.genome_set_id}_${src}.ne
     """
 }
 
 process RUN_INFOMAP {
+    publishDir "${resdir}/${args.genome_set_id}_${label}/ifm_output/",  mode: 'symlink'
     input:
         tuple val(label), path(ibd_pq), val(are_peaks_removed), val(args)
     output:
