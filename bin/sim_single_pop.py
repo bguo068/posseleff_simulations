@@ -49,7 +49,7 @@ class SimParams(CheckableParams):
         )
         p.add_argument("--chrno", type=int, default=d["chrno"])
         p.add_argument("--seqlen", type=int, default=d["seqlen"])
-        p.add_argument("--selpos", type=float, default=d["selpos"])
+        p.add_argument("--selpos", type=int, default=d["selpos"])
         p.add_argument("--num_origins", type=int, default=d["num_origins"])
         p.add_argument("--N", type=int, default=d["N"])
         p.add_argument("--s", type=float, default=d["s"])
