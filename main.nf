@@ -64,6 +64,8 @@ def mp_sets = [
 
 
 process SIM_SP_CHR {
+    tag "${args.genome_set_id}_${chrno}"
+
     publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
     publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
     publishDir "${resdir}/${args.genome_set_id}_${label}/daf/", pattern: "*.daf", mode: 'symlink'
@@ -94,6 +96,8 @@ process SIM_SP_CHR {
 }
 
 process SIM_MP_CHR {
+    tag "${args.genome_set_id}_${chrno}"
+
     publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
     publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
     publishDir "${resdir}/${args.genome_set_id}_${label}/restart_count/", pattern: "*.restart_count", mode: 'symlink'
@@ -124,6 +128,8 @@ process SIM_MP_CHR {
 }
 
 process CALL_IBD {
+    tag "${args.genome_set_id}_${chrno}"
+
     publishDir "${resdir}/${args.genome_set_id}_${label}/tskibd/", pattern: "*_tskibd.ibd", mode: 'symlink'
 
     input: 
@@ -151,6 +157,8 @@ process CALL_IBD {
 }
 
 process PROC_DIST_NE {
+    tag "${genome_set_id}"
+
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.sh", mode: 'symlink'
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.map", mode: 'symlink'
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.ibd.gz", mode: 'symlink'
@@ -181,6 +189,8 @@ process PROC_DIST_NE {
 }
 
 process PROC_INFOMAP {
+    tag "${genome_set_id}"
+
     publishDir "${resdir}/${genome_set_id}_${label}/ifm_input/", pattern: "*_ibd.pq", mode: 'symlink'
 
     input:
@@ -203,6 +213,8 @@ process PROC_INFOMAP {
 }
 
 process RUN_IBDNE {
+    tag "${args.genome_set_id}_${are_peaks_removed}"
+
     publishDir "${resdir}/${args.genome_set_id}_${label}/ne_output/",  mode: 'symlink'
 
     input:
@@ -222,6 +234,7 @@ process RUN_IBDNE {
 }
 
 process RUN_INFOMAP {
+    tag "${args.genome_set_id}_${are_peaks_removed}"
     publishDir "${resdir}/${args.genome_set_id}_${label}/ifm_output/",  mode: 'symlink'
     input:
         tuple val(label), path(ibd_pq), val(are_peaks_removed), val(args)
