@@ -6,7 +6,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 # parse arguments
 pa = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 pa.add_argument("--ibd_files", type=str, nargs=14, required=True)
-pa.add_argument("--out_prefix", type=str, required=True)
+pa.add_argument("--genome_set_id", type=int, required=True)
 args = pa.parse_args()
 
 
@@ -17,13 +17,8 @@ ibd.read_ibd(ibd_fn_lst=args.ibd_files)
 
 
 # output files:
-ofs_ifm_orig_ibd_pq = f"{args.out_prefix}_ifm_orig_ibd.pq"
-ofs_ifm_rmpeaks_ibd_pq = f"{args.out_prefix}_ifm_rmpeaks_ibd.pq"
-
-
-# store combined IBD for IBD distribution analysis
-if args.type == "ibddist_ne":
-    ibd._df.to_parquet(ofs_ibd_pq)
+ofs_ifm_orig_ibd_pq = f"{args.genome_set_id}_ifm_orig_ibd.pq"
+ofs_ifm_rmpeaks_ibd_pq = f"{args.genome_set_id}_ifm_rmpeaks_ibd.pq"
 
 
 # remove highly relatedness samples

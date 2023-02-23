@@ -5,26 +5,27 @@ import ibdutils.runner.ibdne as ibdne
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
 
+ibd_jar_default = str(Path(__file__).parent / "ibdne.jar")
+
 # parse arguments
 pa = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 pa.add_argument("--ibd_files", type=str, nargs=14, required=True)
-pa.add_argument("--out_prefix", type=str, required=True)
-pa.add_argument("--ibdne_jar", type=str, default=None)
+pa.add_argument("--genome_set_id", type=str, required=True)
+pa.add_argument("--ibdne_jar", type=str, default=ibd_jar_default)
 args = pa.parse_args()
 
 assert args.ibdne_jar is not None
 
+idx = args.genome_set_id
 
 # read ibd
 genome_14_100 = ibdutils.Genome.get_genome("simu_14chr_100cm")
-ibd = ibdutils.IBD(genome=genome_14_100, label="orig")
+ibd = ibdutils.IBD(genome=genome_14_100, label=f"{idx}_orig")
 ibd.read_ibd(ibd_fn_lst=args.ibd_files)
 
 
 # output files:
-ofs_ibd_pq = f"{args.out_prefix}_ibddist_ibd.pq"
-ofs_ne_orig_script = f"{args.out_prefix}_ne_orig.sh"
-ofs_ne_rmpeaks_script = f"{args.out_prefix}_ne_rmpeaks.sh"
+ofs_ibd_pq = f"{args.genome_set_id}_ibddist_ibd.pq"
 
 
 # store combined IBD for IBD distribution analysis
@@ -53,36 +54,48 @@ ibd.convert_to_heterozygous_diploids(remove_hbd=True)
 ibd.calc_ibd_cov()
 ibd.find_peaks()
 
-ibd2 = ibd.duplicate("rmpeaks")
+ibd2 = ibd.duplicate(f"{idx}_rmpeaks")
 ibd2.remove_peaks()
+
+# link ibdne.jar file
+if not Path(f"ibdne.jar").exists():
+    assert Path(args.ibdne_jar).exists()
+    this = Path("ibdne.jar")
+    target = Path(args.ibdne_jar).absolute()
+    this.symlink_to(target)
+    print(f"link {this} -> {target}")
 
 # use nerunner (dry_run) to preare inputs and bash scripts
 # --- for ibd before removing ibd peaks ------------------------
 nerunner = ibdne.IbdNeRunner(
     ibd=ibd,
-    input_folder=str(Path("ne_orig").absolute()),
-    output_folder=str(Path("ne_orig").absolute()),
+    input_folder=".",
+    output_folder=".",
     mincm=2,
     minregion=10,
 )
 nerunner.run(nthreads=10, mem_gb=20, dry_run=True)
-# move and rename the script file
-Path(nerunner.ouptut_ne_fn).with_suffix(".sh").rename(ofs_ne_orig_script)
-# link ibdne.jar file
-if not Path(f"ne_orig/ibdne.jar").exists():
-    Path(args.ibdne_jar).absolute().symlink_to(f"ne_orig/ibdne.jar")
 
 # --- for ibd after removing ibd peaks ------------------------
 nerunner = ibdne.IbdNeRunner(
-    ibd=ibd,
-    input_folder=str(Path("ne_rmpeaks").absolute()),
-    output_folder=str(Path("ne_rmpeaks").absolute()),
+    ibd=ibd2,
+    input_folder=".",
+    output_folder=".",
     mincm=2,
     minregion=10,
 )
 nerunner.run(nthreads=10, mem_gb=20, dry_run=True)
-# move and rename the script file
-Path(nerunner.ouptut_ne_fn).with_suffix(".sh").rename(ofs_ne_rmpeaks_script)
-# link ibdne.jar file
-if not Path(f"ne_rmpeaks/ibdne.jar").exists():
-    Path(args.ibdne_jar).absolute().symlink_to(f"ne_rmpeaks/ibdne.jar")
+
+print(
+    f"""
+      output files:
+        {ofs_ibd_pq}
+        ibdne.jar
+        {idx}_orig.sh
+        {idx}_orig.map
+        {idx}_orig.ibd.gz
+        {idx}_rmpeaks.sh
+        {idx}_rmpeaks.map
+        {idx}_rmpeaks.ibd.gz
+      """
+)

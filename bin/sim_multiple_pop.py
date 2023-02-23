@@ -34,7 +34,7 @@ class SimParams(CheckableParams):
         self.num_origins = 1
         self.N = 10000
         self.h = 0.5
-        self.s = 0.2
+        self.s = 0.3
         self.g_sel_start = 80
         self.r = 0.01 / 15_000
         self.sim_relatedness = 0

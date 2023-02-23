@@ -6,18 +6,27 @@ import argparse
 
 
 def get_args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("--tree", type=str, required=True)
     parser.add_argument("--vcf", type=str, required=True)
-    parser.add_argument("--bp_per_cm", type=int, required=True)
-    parser.add_argument("--seqlen_in_cm", type=int, required=True)
     parser.add_argument("--chrno", type=int, required=True)
+    parser.add_argument("--r", type=float, default=0.01 / 15000)
+    parser.add_argument("--seqlen", type=int, default=15000 * 100)
     parser.add_argument("--mincm", type=float, default=2.0)
+    parser.add_argument("--call_hmmibd", type=int, choices=[0, 1], default=0)
     # for hmm only
     parser.add_argument("--n", type=int, default=100)
     parser.add_argument("--m", type=int, default=5)
+    parser.add_argument("--genome_set_id", type=int, required=True)
+    args = parser.parse_args()
 
-    return parser.parse_args()
+    args.bp_per_cm = int(0.01 / args.r)
+    args.seqlen_in_cm = args.seqlen * 100 * args.r
+    print(args)
+
+    return args
 
 
 # ------------------- make genetic map ----------------------------
@@ -29,7 +38,7 @@ def write_map_file(ofs_map, args):
             f"{args.chrno}",
             ".",
             f"{args.seqlen_in_cm}",
-            f"{args.bp_per_cm * args.seqlen_in_cm}",
+            f"{args.seqlen}",
         ]
         f.write("\t".join(fields) + "\n")
 
@@ -119,14 +128,24 @@ if __name__ == "__main__":
     # out file names
     hmmibd_input_fn = f"hmm_inputs_{args.chrno}.txt"
     hmmibd_output_prefix = f"hmm_out_{args.chrno}"
-    ofs_map = f"{args.chrno}.map"
-    ofs_hmmibd = f"{args.chrno}_hmmibd.ibd"
-    ofs_tskibd = f"{args.chrno}_tskibd.ibd"
+    ofs_map = f"{args.genome_set_id}_{args.chrno}.map"
+    ofs_hmmibd = f"{args.genome_set_id}_{args.chrno}_hmmibd.ibd"
+    ofs_tskibd = f"{args.genome_set_id}_{args.chrno}_tskibd.ibd"
 
-    prep_hmmibd_input(args.vcf, hmmibd_input_fn)
+    if not args.call_hmmibd == 1:
 
-    run_hmmibd_and_filter(hmmibd_input_fn, hmmibd_output_prefix, ofs_hmmibd, args)
+        prep_hmmibd_input(args.vcf, hmmibd_input_fn)
+
+        run_hmmibd_and_filter(hmmibd_input_fn, hmmibd_output_prefix, ofs_hmmibd, args)
 
     write_map_file(ofs_map, args)
 
     run_tskibd(ofs_tskibd, args)
+
+    print(
+        f"""
+        output files:
+            {ofs_hmmibd} ({'' if args.call_hmmibd==1 else 'Skipped'})
+            {ofs_tskibd}
+            {ofs_map} """
+    )
