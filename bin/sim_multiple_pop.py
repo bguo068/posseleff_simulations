@@ -42,7 +42,7 @@ class SimParams(CheckableParams):
         self.mig = 1e-5
         self.sel_mig = 0.01
         self.npop = 5
-        self.nsam = 100
+        self.nsam = 200
         self.Tsplit = 500
         self.u = 1e-8
         self.slim_script = str(slim_script_dir / "multiple_pop.slim")
@@ -180,7 +180,7 @@ class SlimMsprimeSimulatorForMultiplePop:
         for pop in range(1, self.params.npop + 1):
             ind_alive = pyslim.individuals_alive_at(orig_ts, 0, population=pop)
             sampled_ind = np.random.choice(
-                ind_alive, size=self.params.nsam, replace=False
+                ind_alive, size=self.params.nsam // 2, replace=False
             )
             for i in sampled_ind:
                 sample_nodes.extend(orig_ts.individual(i).nodes)

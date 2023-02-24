@@ -21,7 +21,7 @@ def sp_defaults = [
     g_ne_change_start : 200,
     N0 : 1000,
     u : 1e-8,
-    nsam : 100,
+    nsam : 1000, // haploid
 ]
 
 def mp_defaults = [
@@ -37,7 +37,7 @@ def mp_defaults = [
     mig : 1e-5,
     sel_mig : 0.01,
     npop : 5,
-    nsam : 100,
+    nsam : 200, // haploid
     Tsplit : 500,
     u : 1e-8,
 ]
