@@ -162,6 +162,7 @@ process PROC_DIST_NE {
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.sh", mode: 'symlink'
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.map", mode: 'symlink'
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.ibd.gz", mode: 'symlink'
+    publishDir "${resdir}/${genome_set_id}_${label}/ibddist_ibd/", pattern: "*_ibddist_ibd.pq", mode: 'symlink'
 
     input:
         tuple val(label), path(ibd_lst), val(genome_set_id)
