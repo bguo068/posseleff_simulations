@@ -36,7 +36,7 @@ class SimParams(CheckableParams):
         self.g_ne_change_start = 200
         self.N0 = 1000
         self.u = 1e-8
-        self.nsam = 100
+        self.nsam = 1000
         self.slim_script = str(slim_script_dir / "single_pop.slim")
 
         # save values to  __defaults__ and clear above attributes
