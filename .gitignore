@@ -2,3 +2,6 @@ bin/tskibd
 bin/hmmIBD
 bin/ibdne.jar
 modules/**
+.nextflow*
+resdir/**
+resdir*
