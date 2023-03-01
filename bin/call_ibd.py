@@ -132,7 +132,7 @@ if __name__ == "__main__":
     ofs_hmmibd = f"{args.genome_set_id}_{args.chrno}_hmmibd.ibd"
     ofs_tskibd = f"{args.genome_set_id}_{args.chrno}_tskibd.ibd"
 
-    if not args.call_hmmibd == 1:
+    if args.call_hmmibd == 1:
 
         prep_hmmibd_input(args.vcf, hmmibd_input_fn)
 
