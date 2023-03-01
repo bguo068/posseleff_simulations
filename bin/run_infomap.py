@@ -12,6 +12,7 @@ def parse_args():
     p.add_argument("--npop", type=int, required=True)
     p.add_argument("--nsam", type=int, required=True)
     p.add_argument("--genome_set_id", type=int, required=True)
+    p.add_argument("--cut_mode", type=str, required=True)
     p.add_argument("--ntrails", type=int, default=1000)
     p.add_argument(
         "--transform", type=str, choices=["square", "cube", "none"], default="square"
@@ -49,7 +50,7 @@ def main():
     args = parse_args()
     member_df = run(args)
 
-    ofs = f"{args.genome_set_id}_member.pq"
+    ofs = f"{args.genome_set_id}_{args.cut_mode}_member.pq"
     member_df.to_parquet(ofs)
     print(member_df)
 

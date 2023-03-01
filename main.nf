@@ -242,11 +242,13 @@ process RUN_INFOMAP {
     output:
         tuple val(label), val(are_peaks_removed), path("*_member.pq")
     script:
+    def cut_mode = are_peaks_removed? 'rmpeaks': 'orig'
     def args_local = [
         ibd_pq: ibd_pq,
         npop: args.npop,
         nsam: args.nsam,
         genome_set_id: args.genome_set_id,
+        cut_mode: cut_mode,
         ntrails: params.ifm_ntrails,
         transform: params.ifm_transform,
     ].collect{k, v-> "--${k} ${v}"}.join(" ")
@@ -254,8 +256,9 @@ process RUN_INFOMAP {
     run_infomap.py ${args_local}
     """
     stub:
+    def cut_mode = are_peaks_removed? 'rmpeaks': 'orig'
     """
-    touch ${args.genome_set_id}_member.pq
+    touch ${args.genome_set_id}_${cut_mode}_member.pq
     """
 }
 

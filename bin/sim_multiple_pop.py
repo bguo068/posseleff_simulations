@@ -139,7 +139,7 @@ class SlimMsprimeSimulatorForMultiplePop:
 
         daf_header_str = "\t".join(
             ["Type", "RestartCount", "GEN"]
-            + [f"DAF{i+1}" for i in range(1, self.params.npop + 1)]
+            + [f"DAF{i}" for i in range(1, self.params.npop + 1)]
         )
         daf_list = [daf_header_str]
 
@@ -152,8 +152,9 @@ class SlimMsprimeSimulatorForMultiplePop:
 
         # read the selected lines into pd dataframe and filter the line for the last
         # restart
-        daf_df = pd.read_csv(io.StringIO("\n".join(daf_list)), sep="\t", header=None)
-        daf_df = daf_df[daf_df.iloc[:, 1] == restart_count]
+        daf_df = pd.read_csv(io.StringIO("\n".join(daf_list)), sep="\t")
+        print(daf_df)
+        daf_df = daf_df[daf_df.RestartCount == restart_count]
 
         self.daf_df = daf_df
         self.restart_count = restart_count

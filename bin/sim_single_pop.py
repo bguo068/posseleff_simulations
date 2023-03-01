@@ -142,11 +142,13 @@ class SlimMsprimeSimulatorForSinglePop:
         ne_lines = ["GEN\tNE"]
         daf_lines = ["GEN\tDAF"]
         restart_count = 0
-        for line in self.slim_stdout:
+        for line in self.slim_stdout.strip().split("\n"):
             if line.startswith("restart_count"):
                 restart_count = int(line.split("\t")[1])
             elif line.startswith("True_Ne"):
                 ne_lines.append(line.replace("True_Ne\t", ""))
+            elif line.startswith("in"):
+                print(line)
             elif line.startswith("DAF"):
                 daf_lines.append(line.replace("DAF\t", ""))
 
@@ -154,8 +156,8 @@ class SlimMsprimeSimulatorForSinglePop:
         self.daf_df = pd.read_csv(io.StringIO("\n".join(daf_lines)), sep="\t")
 
         # Given slim could have restarted the selection process, dedup is needed
-        self.daf_df.drop_duplicates("generation", keep="last", inplace=True)
-        self.true_ne_df.drop_duplicates("generation", keep="last", inplace=True)
+        self.daf_df.drop_duplicates("GEN", keep="last", inplace=True)
+        self.true_ne_df.drop_duplicates("GEN", keep="last", inplace=True)
 
         self.restart_count = restart_count
 

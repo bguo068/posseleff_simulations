@@ -56,6 +56,7 @@ ibd.find_peaks()
 
 ibd2 = ibd.duplicate(f"{idx}_rmpeaks")
 ibd2.remove_peaks()
+ibd2._df = ibd2.cut_and_split_ibd()
 
 # link ibdne.jar file
 if not Path(f"ibdne.jar").exists():
