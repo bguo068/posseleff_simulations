@@ -33,8 +33,8 @@ def run(args) -> pd.DataFrame:
     # make meta data
     meta = pd.DataFrame(
         {
-            "Sample": np.arange(args.nsam * args.npop * 2),  # use haploid here
-            "Population": np.repeat(np.arange(args.npop), args.nsam * 2),
+            "Sample": np.arange(args.nsam * args.npop),  # use haploid here
+            "Population": np.repeat(np.arange(args.npop), args.nsam),
         }
     )
 
