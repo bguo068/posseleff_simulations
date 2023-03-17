@@ -44,7 +44,7 @@ s0:10 modifyChild()
 
 	// use this to let 50% of candicate pass without checking pedegree relatedness
 	// so the Ne etimates are more stable
-	if (child.index % 3 == 0)
+	if (child.index % 2 == 0)
 		return T;
 	prob = parent1.relatedness(parent2);
 	if ((prob > 1.0 / 32) & (prob < 1.0 / 4))
@@ -58,7 +58,7 @@ s0:10 modifyChild()
 1 early()
 {
 	sim.addSubpop("p1", N);
-	community.rescheduleScriptBlock(s0, slim_total_generations - 100 + 1);
+	community.rescheduleScriptBlock(s0, slim_total_generations - 40 + 1);
 	community.rescheduleScriptBlock(s1, slim_total_generations - g_ne_change_start + 1);
 	community.rescheduleScriptBlock(s2, slim_total_generations - g_sel_start - 1, slim_total_generations); // minus 1 so that it allows the s2 code block the save the state
 	community.rescheduleScriptBlock(s3, slim_total_generations + 1, slim_total_generations + 1);
