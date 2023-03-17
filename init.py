@@ -39,6 +39,8 @@ def install_tskibd():
             cd tskibd
             git checkout 8a3aba38067143bcc7934fb8d8a56124e7a88c92
             git submodule update --init --recursive
+            # avoid error when compiled on macos
+            mv tskit/c/VERSION tskit/c/VERSION.txt
             meson build
             ninja -C build tskibd
             cd ../
@@ -67,7 +69,8 @@ def install_hmmibd():
             git checkout a2f796ef8122d7f6b983ae9ac4c6fba35afcd3aa
             sed -i -e 's/const double rec_rate = 7.4e-7/const double rec_rate = 6.67e-7/' \
                     hmmIBD.c
-            x86_64-conda_cos6-linux-gnu-gcc -o hmmIBD -O3 -lm -Wall hmmIBD.c
+            # avoid error when compiled on macos
+            $CC -o hmmIBD -O3 -lm -Wall hmmIBD.c
             cd ..
             cp hmmIBD/hmmIBD bin/hmmIBD
             rm -rf hmmIBD
