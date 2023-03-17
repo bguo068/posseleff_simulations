@@ -5,6 +5,7 @@ nextflow.enable.dsl = 2
 params.ifm_transform = ["square", "cube", "none"][0]
 params.ifm_ntrails = 1000
 params.test = false
+params.num_reps = 1
 params.resdir = "res"
 def resdir = params.resdir
 
@@ -274,10 +275,25 @@ workflow WF_SP {
     println("\n\n------------- Single Population Sets-------------")
     sp_sets.each{k, v -> println("${k}\t\t${v}")}
 
+    def expanded_sets = [:]
+
+    if(params.num_reps == 1) {
+        expanded_sets = sp_sets
+    } else{
+        (0..<(params.num_reps)).each {rep ->
+            sp_sets.each{k, v->
+                def k1 = "${k}_rep${rep}"
+                def v1 = v + [genome_set_id: v.genome_set_id + 10 *  rep]
+                expanded_sets[k1] = v1
+            }
+        } 
+    }
+
+
 
     // SIMULATE chromosomes
     chr_chrno = channel.from(1..14)
-    ch_sp_params = channel.from(sp_sets.collect{k, v-> [k, v]})
+    ch_sp_params = channel.from(expanded_sets.collect{k, v-> [k, v]})
 
     if (params.test) {
         ch_sp_params = ch_sp_params.first().map{
@@ -334,11 +350,26 @@ workflow WF_MP {
     println("\n\n------------- Multiple Population Sets-------------")
     mp_sets.each{k, v -> println("${k}\t\t${v}")}
 
+    def expanded_sets = [:]
 
+    if(params.num_reps == 1)
+    {
+        expanded_sets = mp_sets
+    }
+    else {
+        (0..<(params.num_reps)).each {rep ->
+            mp_sets.each{k, v->
+                def k1 = "${k}_rep${rep}"
+                def v1 = v + [genome_set_id: v.genome_set_id + 10 *  rep]
+                expanded_sets[k1] = v1
+            }
+        } 
+
+    }
 
     // SIMULATE chromosomes
     chr_chrno = channel.from(1..14)
-    ch_mp_params = channel.from(mp_sets.collect{k, v-> [k, v]})
+    ch_mp_params = channel.from(expanded_sets.collect{k, v-> [k, v]})
 
     if (params.test) {
         ch_mp_params = ch_mp_params.first().map{
