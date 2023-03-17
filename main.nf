@@ -54,6 +54,7 @@ def sp_sets = [
     sp_o01: sp_defaults + [num_origins: 1, genome_set_id: 10007],
     sp_o03: sp_defaults + [num_origins: 3, genome_set_id: 10008],
     sp_o27: sp_defaults + [num_origins: 27, genome_set_id: 10009],
+    sp_rel: sp_defaults + [sim_relatedness: 1, genome_set_id: 30000],
 ]
 
 def mp_sets = [
@@ -61,6 +62,7 @@ def mp_sets = [
     mp_s01: mp_defaults + [s:0.1, genome_set_id: 20001],
     mp_s02: mp_defaults + [s:0.2, genome_set_id: 20002],
     mp_s03: mp_defaults + [s:0.3, genome_set_id: 20003],
+    mp_rel: mp_defaults + [sim_relatedness: 1, genome_set_id: 30001],
 ]
 
 
