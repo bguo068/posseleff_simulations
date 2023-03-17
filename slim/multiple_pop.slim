@@ -35,7 +35,7 @@ initialize()
 	defineGlobal("restart_counter", 0);
 }
 
-modifyChild()
+s0 :10 modifyChild()
 {
 	// normal simulation or old generations, always return T
 	if (!sim_relatedness)
@@ -97,7 +97,8 @@ function (void)print_allele_frequencies(void)
 
 1 late()
 {
-	community.rescheduleScriptBlock(s0, g_sel_start, g_sel_start);
+	community.rescheduleScriptBlock(s0, g_sel_start - 40 + 1);
+	community.rescheduleScriptBlock(s1, g_sel_start, g_sel_start);
 	sim.treeSeqOutput(paste("tmp_slim_state_multiple_pop_", outid, ".trees", sep=''));
 	restart_with_selection();
 	print_allele_frequencies();
@@ -122,7 +123,7 @@ function (void)print_allele_frequencies(void)
 }
 
 // This time is rescheduled
-s0 100 late()
+s1 100 late()
 {
 	retry = restart_counter <= max_restart;
 	afreq = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
