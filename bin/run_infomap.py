@@ -1,14 +1,15 @@
 #! /usr/bin/env python3
 
-import pandas as pd
-import numpy as np
-from ibdutils.utils.ibdutils import IBD, Genome
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+
+import numpy as np
+import pandas as pd
+from ibdutils.utils.ibdutils import IBD
 
 
 def parse_args():
     p = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    p.add_argument("--ibd_pq", type=str, required=True)
+    p.add_argument("--ibd_obj", type=str, required=True)
     p.add_argument("--npop", type=int, required=True)
     p.add_argument("--nsam", type=int, required=True)
     p.add_argument("--genome_set_id", type=int, required=True)
@@ -26,9 +27,7 @@ def parse_args():
 
 def run(args) -> pd.DataFrame:
 
-    g = Genome.get_genome("simu_14chr_100cm")
-    ibd = IBD(genome=g, label=f"gsid_{args.genome_set_id}")
-    ibd.read_ibd([args.ibd_pq], format="parquet")
+    ibd = IBD.pickle_load(args.ibd_obj)
 
     # make meta data
     meta = pd.DataFrame(
@@ -46,13 +45,10 @@ def run(args) -> pd.DataFrame:
     return member_df
 
 
-def main():
+if __name__ == "__main__":
     args = parse_args()
     member_df = run(args)
 
     ofs = f"{args.genome_set_id}_{args.cut_mode}_member.pq"
     member_df.to_parquet(ofs)
     print(member_df)
-
-
-main()

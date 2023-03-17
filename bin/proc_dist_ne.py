@@ -22,14 +22,16 @@ idx = args.genome_set_id
 genome_14_100 = ibdutils.Genome.get_genome("simu_14chr_100cm")
 ibd = ibdutils.IBD(genome=genome_14_100, label=f"{idx}_orig")
 ibd.read_ibd(ibd_fn_lst=args.ibd_files)
+ibd.calc_ibd_cov()
+ibd.find_peaks()
 
 
 # output files:
-ofs_ibd_pq = f"{args.genome_set_id}_ibddist_ibd.pq"
+of_ibddist_obj = f"{args.genome_set_id}.ibddist.ibdobj.gz"
 
 
 # store combined IBD for IBD distribution analysis
-ibd._df.to_parquet(ofs_ibd_pq)
+ibd.pickle_dump(of_ibddist_obj)
 
 
 # remove highly relatedness samples
@@ -53,13 +55,17 @@ ibd.convert_to_heterozygous_diploids(remove_hbd=True)
 # calculate coverage and remove peaks
 ibd.calc_ibd_cov()
 ibd.find_peaks()
+of_orig_ibdne_obj = f"{args.genome_set_id}_orig.ibdne.ibdobj.gz"
+ibd.pickle_dump(of_orig_ibdne_obj)
 
 ibd2 = ibd.duplicate(f"{idx}_rmpeaks")
 ibd2.remove_peaks()
 ibd2._df = ibd2.cut_and_split_ibd()
+of_rmpeaks_ibdne_obj = f"{args.genome_set_id}_rmpeaks.ibdne.ibdobj.gz"
+ibd2.pickle_dump(of_rmpeaks_ibdne_obj)
 
 # link ibdne.jar file
-if not Path(f"ibdne.jar").exists():
+if not Path("ibdne.jar").exists():
     assert Path(args.ibdne_jar).exists()
     this = Path("ibdne.jar")
     target = Path(args.ibdne_jar).absolute()
@@ -90,7 +96,7 @@ nerunner.run(nthreads=10, mem_gb=20, dry_run=True)
 print(
     f"""
       output files:
-        {ofs_ibd_pq}
+        {of_ibddist_obj}
         ibdne.jar
         {idx}_orig.sh
         {idx}_orig.map
@@ -98,5 +104,7 @@ print(
         {idx}_rmpeaks.sh
         {idx}_rmpeaks.map
         {idx}_rmpeaks.ibd.gz
+        {of_orig_ibdne_obj}
+        {of_rmpeaks_ibdne_obj}
       """
 )

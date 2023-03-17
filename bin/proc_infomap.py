@@ -17,8 +17,8 @@ ibd.read_ibd(ibd_fn_lst=args.ibd_files)
 
 
 # output files:
-ofs_ifm_orig_ibd_pq = f"{args.genome_set_id}_ifm_orig_ibd.pq"
-ofs_ifm_rmpeaks_ibd_pq = f"{args.genome_set_id}_ifm_rmpeaks_ibd.pq"
+of_ifm_orig_ibd_obj = f"{args.genome_set_id}_orig.ifm.ibdobj.gz"
+of_ifm_rmpeaks_ibd_obj = f"{args.genome_set_id}_rmpeaks.ifm.ibdobj.gz"
 
 
 # remove highly relatedness samples
@@ -34,5 +34,5 @@ ibd.find_peaks()
 ibd2 = ibd.duplicate("rmpeak")
 ibd2.remove_peaks()
 
-ibd._df.to_parquet(ofs_ifm_orig_ibd_pq)
-ibd2._df.to_parquet(ofs_ifm_rmpeaks_ibd_pq)
+ibd.pickle_dump(of_ifm_orig_ibd_obj)
+ibd2.pickle_dump(of_ifm_rmpeaks_ibd_obj)

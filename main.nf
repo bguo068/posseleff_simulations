@@ -162,7 +162,8 @@ process PROC_DIST_NE {
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.sh", mode: 'symlink'
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.map", mode: 'symlink'
     publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.ibd.gz", mode: 'symlink'
-    publishDir "${resdir}/${genome_set_id}_${label}/ibddist_ibd/", pattern: "*_ibddist_ibd.pq", mode: 'symlink'
+    publishDir "${resdir}/${genome_set_id}_${label}/ibddist_ibd/", pattern: "*.ibddist.ibdobj.gz", mode: 'symlink'
+    publishDir "${resdir}/${genome_set_id}_${label}/ibdne_ibd/", pattern: "*.ibdne.ibdobj.gz", mode: 'symlink'
 
     input:
         tuple val(label), path(ibd_lst), val(genome_set_id)
@@ -171,7 +172,8 @@ process PROC_DIST_NE {
                 path("*_orig.map"), path("*_orig.ibd.gz"), emit: ne_input_orig
         tuple val(label), path("ibdne.jar"), path("*_rmpeaks.sh"),  \
                 path("*_rmpeaks.map"), path("*_rmpeaks.ibd.gz"), emit: ne_input_rmpeaks
-        tuple val(label), path("*_ibddist_ibd.pq"), emit: ibddist_ibd_pq
+        tuple val(label), path("*.ibddist.ibdobj.gz"), emit: ibddist_ibd_obj
+        tuple val(label), path("*.ibdne.ibdobj.gz"), emit: ibdne_ibd_obj
     script:
     def args_local = [
         ibd_files: "${ibd_lst}", // path is a blank separate list
@@ -185,7 +187,9 @@ process PROC_DIST_NE {
     touch ibdne.jar
     touch ${genome_set_id}{_orig.sh,_orig.map,_orig.ibd.gz}
     touch ${genome_set_id}{_rmpeaks.sh,_rmpeaks.map,_rmpeaks.ibd.gz}
-    touch ${genome_set_id}_ibddist_ibd.pq
+    touch ${genome_set_id}.ibddist.ibdobj.gz
+    touch ${genome_set_id}_orig.ibdne.ibdobj.gz
+    touch ${genome_set_id}_rmpeaks.ibdne.ibdobj.gz
     """
 }
 
@@ -197,8 +201,8 @@ process PROC_INFOMAP {
     input:
         tuple val(label), path(ibd_lst), val(genome_set_id)
     output:
-        tuple val(label), path("*_ifm_orig_ibd.pq"), emit: ifm_orig_ibd_pq
-        tuple val(label), path("*_ifm_rmpeaks_ibd.pq"), emit: ifm_rmpeaks_ibd_pq
+        tuple val(label), path("*_orig.ifm.ibdobj.gz"), emit: ifm_orig_ibd_obj
+        tuple val(label), path("*_rmpeaks.ifm.ibdobj.gz"), emit: ifm_rmpeaks_ibd_obj
     script:
     def args_local = [
         ibd_files: "${ibd_lst}", // path is a blank separate list
@@ -209,7 +213,7 @@ process PROC_INFOMAP {
     """
     stub:
     """
-    touch ${genome_set_id}{_ifm_orig_ibd.pq,_ifm_rmpeaks_ibd.pq}
+    touch ${genome_set_id}{_orig.ifm.ibdobj.gz,_rmpeaks.ifm.ibdobj.gz}
     """
 }
 
@@ -238,13 +242,13 @@ process RUN_INFOMAP {
     tag "${args.genome_set_id}_${are_peaks_removed}"
     publishDir "${resdir}/${args.genome_set_id}_${label}/ifm_output/",  mode: 'symlink'
     input:
-        tuple val(label), path(ibd_pq), val(are_peaks_removed), val(args)
+        tuple val(label), path(ibd_obj), val(are_peaks_removed), val(args)
     output:
         tuple val(label), val(are_peaks_removed), path("*_member.pq")
     script:
     def cut_mode = are_peaks_removed? 'rmpeaks': 'orig'
     def args_local = [
-        ibd_pq: ibd_pq,
+        ibd_obj: ibd_obj,
         npop: args.npop,
         nsam: args.nsam,
         genome_set_id: args.genome_set_id,
@@ -308,7 +312,7 @@ workflow WF_SP {
 
     // Process IBD for ibd distribution and ne analyses
     PROC_DIST_NE(ch_ibd_per_genome)
-    // PROC_DIST_NE.out.ibddist_ibd_pq.view{label, ibdpq -> [label, ibdpq.getName()]}
+    // PROC_DIST_NE.out.ibddist_ibd_obj.view{label, ibdpq -> [label, ibdpq.getName()]}
 
 
     // RUN IBDNe actually
@@ -370,13 +374,13 @@ workflow WF_MP {
     // Process IBD for ibd distribution and ne analyses
     PROC_INFOMAP(ch_ibd_per_genome)
     
-    // PROC_INFOMAP.out.ifm_orig_ibd_pq.view{label, ibdpq -> [label, ibdpq.getName()]}
+    // PROC_INFOMAP.out.ifm_orig_ibd_ob.view{label, ibdpq -> [label, ibdpq.getName()]}
 
 
     // RUN INFOMAP
     RUN_INFOMAP(
-        PROC_INFOMAP.out.ifm_orig_ibd_pq.map{it -> it + false}.combine(ch_mp_params, by:0).concat(
-            PROC_INFOMAP.out.ifm_rmpeaks_ibd_pq.map{it -> it + true}.combine(ch_mp_params, by:0)
+        PROC_INFOMAP.out.ifm_orig_ibd_obj.map{it -> it + false}.combine(ch_mp_params, by:0).concat(
+            PROC_INFOMAP.out.ifm_rmpeaks_ibd_obj.map{it -> it + true}.combine(ch_mp_params, by:0)
         )
     )
 
