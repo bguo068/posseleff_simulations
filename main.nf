@@ -169,7 +169,7 @@ process PROC_DIST_NE {
     publishDir "${resdir}/${genome_set_id}_${label}/ibdne_ibd/", pattern: "*.ibdne.ibdobj.gz", mode: 'symlink'
 
     input:
-        tuple val(label), path(ibd_lst), val(genome_set_id)
+        tuple val(label), path(ibd_lst), path(vcf_lst), val(genome_set_id)
     output:
         tuple val(label), path("ibdne.jar"), path("*_orig.sh"), \
                 path("*_orig.map"), path("*_orig.ibd.gz"), emit: ne_input_orig
@@ -180,6 +180,7 @@ process PROC_DIST_NE {
     script:
     def args_local = [
         ibd_files: "${ibd_lst}", // path is a blank separate list
+        vcf_files: "${vcf_lst}", // path is a blank separate list
         genome_set_id: genome_set_id,
     ].collect{k, v-> "--${k} ${v}"}.join(" ")
     """
@@ -202,13 +203,14 @@ process PROC_INFOMAP {
     publishDir "${resdir}/${genome_set_id}_${label}/ifm_input/", pattern: "*_ibd.pq", mode: 'symlink'
 
     input:
-        tuple val(label), path(ibd_lst), val(genome_set_id)
+        tuple val(label), path(ibd_lst), path(vcf_lst), val(genome_set_id)
     output:
         tuple val(label), path("*_orig.ifm.ibdobj.gz"), emit: ifm_orig_ibd_obj
         tuple val(label), path("*_rmpeaks.ifm.ibdobj.gz"), emit: ifm_rmpeaks_ibd_obj
     script:
     def args_local = [
         ibd_files: "${ibd_lst}", // path is a blank separate list
+        vcf_files: "${vcf_lst}", // path is a blank separate list
         genome_set_id: genome_set_id,
     ].collect{k, v-> "--${k} ${v}"}.join(" ")
     """
@@ -319,10 +321,15 @@ workflow WF_SP {
 
     // COLLECT PER SETS
     ch_ibd_per_genome = CALL_IBD.out.tskibd
-        .map{ label, chrno, ibd -> [groupKey(label, 14), [chrno, ibd]] }
+        // tskibd: label, chrno, ibd
+        // trees_vcf: label, chrno, tree, vcf
+        .combine(SIM_SP_CHR.out.trees_vcf.map{it[[0, 1, 3]]}, by: [0, 1])
+        .map{ label, chrno, ibd, vcf -> 
+            [groupKey(label, 14), [chrno, ibd, vcf]] }
         .groupTuple(by:0, sort: {x,y-> x[0]<=>y[0] })
         .combine(ch_sp_params, by:0)
-        .map{label, ll, args-> [label, ll.collect{it[1]}, args.genome_set_id]}
+        .map{label, ll, args-> 
+            [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
 
     // ch_ibd_per_genome.view{label, trees_lst, genome_set_id->
     //        [label, trees_lst.collect{it.getName()}, genome_set_id]}
@@ -392,13 +399,17 @@ workflow WF_MP {
     // CALL_IBD.out.tskibd.view{label, chrno, ibd -> [label, chrno, ibd.getName()]}
 
 
-
     // COLLECT PER SETS
     ch_ibd_per_genome = CALL_IBD.out.tskibd
-        .map{ label, chrno, ibd -> [groupKey(label, 14), [chrno, ibd]] }
+        // tskibd: label, chrno, ibd
+        // trees_vcf: label, chrno, tree, vcf
+        .combine(SIM_MP_CHR.out.trees_vcf.map{it[[0, 1, 3]]}, by: [0, 1])
+        .map{ label, chrno, ibd, vcf -> 
+            [groupKey(label, 14), [chrno, ibd, vcf]] }
         .groupTuple(by:0, sort: {x,y-> x[0]<=>y[0] })
         .combine(ch_mp_params, by:0)
-        .map{label, ll, args-> [label, ll.collect{it[1]}, args.genome_set_id]}
+        .map{label, ll, args-> 
+            [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
 
     // ch_ibd_per_genome.view{label, trees_lst, genome_set_id->
     //        [label, trees_lst.collect{it.getName()}, genome_set_id]}

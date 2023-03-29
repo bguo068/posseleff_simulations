@@ -10,6 +10,7 @@ ibd_jar_default = str(Path(__file__).parent / "ibdne.jar")
 # parse arguments
 pa = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 pa.add_argument("--ibd_files", type=str, nargs=14, required=True)
+pa.add_argument("--vcf_files", type=str, nargs=14, required=True)
 pa.add_argument("--genome_set_id", type=str, required=True)
 pa.add_argument("--ibdne_jar", type=str, default=ibd_jar_default)
 args = pa.parse_args()
@@ -55,6 +56,12 @@ ibd.convert_to_heterozygous_diploids(remove_hbd=True)
 # calculate coverage and remove peaks
 ibd.calc_ibd_cov()
 ibd.find_peaks()
+
+# calculate XiR,s and filter peaks
+xirs_df = ibd.calc_xirs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
+ibd.filter_peaks_by_xirs(xirs_df)
+
+
 of_orig_ibdne_obj = f"{args.genome_set_id}_orig.ibdne.ibdobj.gz"
 ibd.pickle_dump(of_orig_ibdne_obj)
 
