@@ -200,7 +200,8 @@ process PROC_DIST_NE {
 process PROC_INFOMAP {
     tag "${genome_set_id}"
 
-    publishDir "${resdir}/${genome_set_id}_${label}/ifm_input/", pattern: "*_ibd.pq", mode: 'symlink'
+    publishDir "${resdir}/${genome_set_id}_${label}/ifm_input/", \
+        pattern: "*.ibdobj.gz", mode: 'symlink'
 
     input:
         tuple val(label), path(ibd_lst), path(vcf_lst), val(genome_set_id)
