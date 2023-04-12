@@ -1,0 +1,136 @@
+\documentclass[11pt]{article}
+
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage[margin=1cm, footskip=0.5cm, papersize={8.5in,11in}]{geometry}
+\usepackage{graphicx}
+
+\begin{document}
+
+\section {Peak identification and filteration}
+\begin{itemize}[noitemsep,topsep=0pt]
+	\item The main problem in simulated data is high false positiveness of IBD peaks/selection signals
+	      especially when there is no selection, noise can be counted as selection signals
+	\item The false positiveness can be dramatically reduced by
+	      overlaying the \textit{xirs}-based selection scan signals.
+	      Single hit is already a good criteria. More hits gradually reduce sensitivity.
+	\item When selection is simulated, both \textbf{iqr} and \textbf{std} peak finding methods
+	      are sensitively enough to capture most selection signals, with \textbf{std} method slightly
+	      more sensitive
+\end{itemize}
+
+Examples: Figures \ref{fig:xirs_single_pop} and \ref{fig:xirs_multi_pop}.
+
+\begin{table}
+	\center
+	\caption{\textbf{Different peak identification and filtering criteria in simulated data.} The number represent
+		total identified (and filtered) peaks across 30 replicated simulation of 14 chromosomes.
+		In selection cases, the expected total will be 420; in neutral cases, it would be 0.
+	}
+	\begin{tabular}{llllrrrrrr}
+		\hline
+		\hline
+		                        &                         &                         &                & Unfilt & H1    & H2    & H3    & H5    & H10   \\
+		Model                   & Sel                     & PeakFindMeth            & XirsCorrMeth   &        &       &       &       &       &       \\
+		\hline
+		\multirow[t]{12}{*}{mp} & \multirow[t]{6}{*}{neu} & \multirow[t]{3}{*}{iqr} & bonferroni     & 344    & 0.0   & 0.0   & 0.0   & 0.0   & 0.0   \\
+		                        &                         &                         & bonferroni\_cm & 344    & 0.0   & 0.0   & 0.0   & 0.0   & 0.0   \\
+		                        &                         &                         & fdr\_bh        & 344    & 0.0   & 0.0   & 0.0   & 0.0   & 0.0   \\
+		\cline{4-10}
+		                        &                         & \multirow[t]{3}{*}{std} & bonferroni     & 1817   & 0.0   & 0.0   & 0.0   & 0.0   & 0.0   \\
+		                        &                         &                         & bonferroni\_cm & 1817   & 0.0   & 0.0   & 0.0   & 0.0   & 0.0   \\
+		                        &                         &                         & fdr\_bh        & 1817   & 0.0   & 0.0   & 0.0   & 0.0   & 0.0   \\
+		\cline{4-10}
+		                        & \multirow[t]{6}{*}{s03} & \multirow[t]{3}{*}{iqr} & bonferroni     & 418    & 384.0 & 377.0 & 370.0 & 355.0 & 328.0 \\
+		                        &                         &                         & bonferroni\_cm & 418    & 392.0 & 385.0 & 379.0 & 366.0 & 346.0 \\
+		                        &                         &                         & fdr\_bh        & 418    & 400.0 & 395.0 & 390.0 & 385.0 & 366.0 \\
+		\cline{4-10}
+		                        &                         & \multirow[t]{3}{*}{std} & bonferroni     & 427    & 384.0 & 377.0 & 370.0 & 355.0 & 328.0 \\
+		                        &                         &                         & bonferroni\_cm & 427    & 392.0 & 385.0 & 379.0 & 366.0 & 346.0 \\
+		                        &                         &                         & fdr\_bh        & 427    & 400.0 & 395.0 & 390.0 & 385.0 & 366.0 \\
+		\cline{4-10}
+		\multirow[t]{12}{*}{sp} & \multirow[t]{6}{*}{neu} & \multirow[t]{3}{*}{iqr} & bonferroni     & 508    & 36.0  & 17.0  & 12.0  & 3.0   & 2.0   \\
+		                        &                         &                         & bonferroni\_cm & 508    & 95.0  & 43.0  & 27.0  & 14.0  & 3.0   \\
+		                        &                         &                         & fdr\_bh        & 508    & 64.0  & 29.0  & 20.0  & 10.0  & 3.0   \\
+		\cline{4-10}
+		                        &                         & \multirow[t]{3}{*}{std} & bonferroni     & 1670   & 43.0  & 17.0  & 12.0  & 3.0   & 2.0   \\
+		                        &                         &                         & bonferroni\_cm & 1670   & 122.0 & 45.0  & 27.0  & 14.0  & 3.0   \\
+		                        &                         &                         & fdr\_bh        & 1670   & 80.0  & 29.0  & 20.0  & 10.0  & 3.0   \\
+		\cline{4-10}
+		                        & \multirow[t]{6}{*}{s03} & \multirow[t]{3}{*}{iqr} & bonferroni     & 448    & 414.0 & 408.0 & 400.0 & 387.0 & 347.0 \\
+		                        &                         &                         & bonferroni\_cm & 448    & 416.0 & 412.0 & 412.0 & 401.0 & 377.0 \\
+		                        &                         &                         & fdr\_bh        & 448    & 417.0 & 415.0 & 415.0 & 414.0 & 404.0 \\
+		\cline{4-10}
+		                        &                         & \multirow[t]{3}{*}{std} & bonferroni     & 430    & 414.0 & 408.0 & 400.0 & 387.0 & 347.0 \\
+		                        &                         &                         & bonferroni\_cm & 430    & 416.0 & 412.0 & 412.0 & 401.0 & 377.0 \\
+		                        &                         &                         & fdr\_bh        & 430    & 417.0 & 415.0 & 415.0 & 414.0 & 404.0 \\
+		\hline
+		\hline
+	\end{tabular}
+	\label{tab:peak_id_filt_meth}
+
+\end{table}
+
+\begin{figure}
+	\center
+	\caption{Peak identification and filtering in (simulated) single population}
+	\includegraphics[width=0.8\textwidth]{../sim_xirs_single_pop_all.png}
+	\label{fig:xirs_single_pop}
+\end{figure}
+
+\begin{figure}
+	\center
+	\caption{Peak identification and filtering in (simulated) mutliple population}
+	\includegraphics[width=0.8\textwidth]{../sim_xirs_multi_pop_all.png}
+	\label{fig:xirs_multi_pop}
+\end{figure}
+
+\begin{verbatim}
+notes: groot:/t1/posseleff_simulations/run4/notes
+simulation: lambda:/local/chib/toconnor_grp/bing/posseleff_simulations/run4
+analysis: groot:/t1/posseleff_simulations/run4
+\end{verbatim}
+
+
+\section{Statatistics of Ne and population structure inference in simulated data}
+
+Ne comparison: Figure \ref{fig:sim_ne_cmp}.
+
+\noindent
+Population structure inference: Table \ref{tab:sim_popstruct_cmp}.
+
+\begin{verbatim}
+notes: groot:/t1/posseleff_simulations/run4/notes
+simulation: lambda:/local/chib/toconnor_grp/bing/posseleff_simulations/run4
+analysis: groot:/t1/posseleff_simulations/run4
+\end{verbatim}
+
+\begin{figure}
+	\center
+	\caption{Statatistics on Ne inference in simulated data (Single population)}
+	\includegraphics[width=0.8\textwidth]{../sim_ne.png}
+	\label{fig:sim_ne_cmp}
+\end{figure}
+
+
+\begin{table}
+	\center
+	\caption{Statatistics on Population structure in simulated data (multiple populations)}
+	\begin{tabular}{lrrrr}
+		\hline
+		\hline
+		      & AdjRand (Orig)     & AdjRand (Rmpeaks) & PvaluePairedtest & PvalueTtest \\
+		Group &                    &                   &                  &             \\
+		neu   & 0.603 $\pm$  0.061 & 0.603 $\pm$ 0.061 & NA               & 1.000000    \\
+		s01   & 0.622 $\pm$  0.066 & 0.620 $\pm$ 0.062 & 0.336263         & 0.878249    \\
+		s02   & 0.488 $\pm$  0.072 & 0.629 $\pm$ 0.079 & 0.000000         & 0.000000    \\
+		s03   & 0.124 $\pm$  0.035 & 0.559 $\pm$ 0.084 & 0.000000         & 0.000000    \\
+		\hline
+		\hline
+	\end{tabular}
+	\label{tab:sim_popstruct_cmp}
+
+\end{table}
+
+
+\end{document}
