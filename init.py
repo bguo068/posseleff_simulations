@@ -90,7 +90,7 @@ def download_ibdne():
     else:
         print("download ibdne.jar into bin/")
         url = "https://faculty.washington.edu/browning/ibdne/ibdne.23Apr20.ae9.jar"
-        assert run(f"wget {url} -O bin/ibdne.jar", shell=True).returncode == 0
+        assert run(f"wget {url} --no-check-certificate -O bin/ibdne.jar", shell=True).returncode == 0
 
 
 if __name__ == "__main__":
