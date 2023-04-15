@@ -14,7 +14,7 @@ def parse_args():
     p.add_argument("--nsam", type=int, required=True)
     p.add_argument("--genome_set_id", type=int, required=True)
     p.add_argument("--cut_mode", type=str, required=True)
-    p.add_argument("--ntrails", type=int, default=1000)
+    p.add_argument("--ntrials", type=int, default=1000)
     p.add_argument(
         "--transform", type=str, choices=["square", "cube", "none"], default="square"
     )
@@ -39,7 +39,7 @@ def run(args) -> pd.DataFrame:
 
     mat = ibd.make_ibd_matrix()
     member_df = ibd.call_infomap_get_member_df(
-        mat, meta, trials=args.ntrails, transform=args.transform
+        mat, meta, trials=args.ntrials, transform=args.transform
     )
 
     return member_df
