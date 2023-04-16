@@ -3,7 +3,7 @@
 nextflow.enable.dsl = 2
 
 params.ifm_transform = ["square", "cube", "none"][0]
-params.ifm_ntrails = 1000
+params.ifm_ntrials = 1000
 params.test = false
 params.num_reps = 1
 params.resdir = "res"
@@ -259,7 +259,7 @@ process RUN_INFOMAP {
         nsam: args.nsam,
         genome_set_id: args.genome_set_id,
         cut_mode: cut_mode,
-        ntrails: params.ifm_ntrails,
+        ntrials: params.ifm_ntrials,
         transform: params.ifm_transform,
     ].collect{k, v-> "--${k} ${v}"}.join(" ")
     """
