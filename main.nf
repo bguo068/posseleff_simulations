@@ -7,6 +7,11 @@ params.ifm_ntrials = 1000
 params.test = false
 params.num_reps = 1
 params.resdir = "res"
+
+params.ibdne_mincm = 2
+params.ibdne_minregion = 10
+params.ibdne_flatmeth = 'none'
+
 def resdir = params.resdir
 
 def sp_defaults = [
@@ -55,6 +60,7 @@ def sp_sets = [
     sp_o03: sp_defaults + [num_origins: 3, genome_set_id: 10008],
     sp_o27: sp_defaults + [num_origins: 27, genome_set_id: 10009],
     sp_rel: sp_defaults + [sim_relatedness: 1, genome_set_id: 30000],
+    sp_rels03: sp_defaults + [sim_relatedness: 1, s: 0.3, genome_set_id: 30002],
 ]
 
 def mp_sets = [
@@ -63,6 +69,7 @@ def mp_sets = [
     mp_s02: mp_defaults + [s:0.2, genome_set_id: 20002],
     mp_s03: mp_defaults + [s:0.3, genome_set_id: 20003],
     mp_rel: mp_defaults + [sim_relatedness: 1, genome_set_id: 30001],
+    mp_rels03: mp_defaults + [sim_relatedness: 1, s: 0.3, genome_set_id: 30003],
 ]
 
 
@@ -182,6 +189,9 @@ process PROC_DIST_NE {
         ibd_files: "${ibd_lst}", // path is a blank separate list
         vcf_files: "${vcf_lst}", // path is a blank separate list
         genome_set_id: genome_set_id,
+        ibdne_mincm: params.ibdne_mincm,
+        ibdne_minregion: params.ibdne_minregion,
+        ibdne_flatmeth: params.ibdne_flatmeth,
     ].collect{k, v-> "--${k} ${v}"}.join(" ")
     """
     proc_dist_ne.py ${args_local} 

@@ -5,3 +5,4 @@ modules/**
 .nextflow*
 resdir/**
 resdir*
+**/work
