@@ -1,5 +1,21 @@
 # `posseleff_simulations`
 
+The `posseleff_simulations` repository is designed to assess the impact of
+positive selection on Identity by Descent (IBD)-based inferences, leveraging
+population genetic simulation and true IBD methodologies. The pipeline begins by running
+simulations to generate tree sequences, allowing for both single and multiple
+population models for various analyses. The selection simulation can be tailored
+with parameters such as the selection coefficient, number of origins of the
+favored mutation, selection starting time, and high-relatedness simulation
+options. From there, the pipeline involves calling true IBD segments from the
+tree sequence, followed by IBD processing for generating input files, selection
+correction, and calling IBDNe and Infomap for Ne and population structure
+inference. The pipeline is highly configurable, accommodating different
+scenarios and requirements, and produces detailed output for further analysis.
+Installation and execution instructions are provided, as well as options for
+customization, making it a versatile tool for many IBD-related analyses.
+
+
 ## Outline of the pipeline
 - Run simulation and generate tree sequence
     - Two demographic models
