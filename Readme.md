@@ -47,3 +47,37 @@
     - within each subfolder:
         - `ifm_output` contains infomap results
         - `ne_output` contains IBDNe estimates
+
+# Citations
+
+If you find this repository useful, please cite our preprint:
+> Guo, B., Borda, V., Laboulaye, R., Spring, M. D., Wojnarski, M., Vesely, B.
+A., Silva, J. C., Waters, N. C., O'Connor, T. D., & Takala-Harrison, S. (2023).
+Strong Positive Selection Biases Identity-By-Descent-Based Inferences of Recent
+Demography and Population Structure in Plasmodium falciparum. bioRxiv : the
+preprint server for biology, 2023.07.14.549114.
+https://doi.org/10.1101/2023.07.14.549114
+
+Other citations:
+
+- `Xir,s` statistics: 
+> Henden, L., Lee, S., Mueller, I., Barry, A., & Bahlo, M. (2018).
+Identity-by-descent analyses for measuring population dynamics and selection in
+recombining pathogens. PLoS genetics, 14(5), e1007279.
+https://doi.org/10.1371/journal.pgen.1007279
+
+- `IBDNe`
+> Browning, S. R., & Browning, B. L. (2015). Accurate Non-parametric Estimation
+of Recent Effective Population Size from Segments of Identity by Descent.
+American journal of human genetics, 97(3), 404–418.
+https://doi.org/10.1016/j.ajhg.2015.07.012
+
+- `Infomap` algorithm
+> Rosvall, M., & Bergstrom, C. T. (2008). Maps of random walks on complex
+networks reveal community structure. Proceedings of the National Academy of
+Sciences of the United States of America, 105(4), 1118–1123.
+https://doi.org/10.1073/pnas.0706851105
+
+
+## Related Repository:
+`tskibd`: https://github.com/bguo068/tskibd
