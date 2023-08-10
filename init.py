@@ -35,7 +35,7 @@ def install_tskibd():
             eval "$(conda shell.bash hook)"
             conda activate simulation
             rm -rf tskibd
-            git clone git@github.com:bguo068/tskibd.git tskibd
+            git clone https://github.com/bguo068/tskibd.git
             cd tskibd
             git checkout 8a3aba38067143bcc7934fb8d8a56124e7a88c92
             git submodule update --init --recursive
