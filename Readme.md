@@ -22,7 +22,7 @@ customization, making it a versatile tool for many IBD-related analyses.
         - Single population model for IBD distribution and Ne analysis, and 
         - Multiple population model for population structure analysis
     - Selection simulation:
-        - Each of the above models allows positive selection simulation
+        - Each of the above models allows for positive selection simulation
         - Tunable Simulation parameters include
             1.	selection coefficient
             2.	number of origins of the favored mutation
@@ -33,31 +33,49 @@ customization, making it a versatile tool for many IBD-related analyses.
     - IBD processing for generating input files for IBDNe (Ne estimation)
     - IBD processing for generating IBD for calling Infomap (population structure)
     - Identify and validate IBD peaks (due to selection)
-    - Remove IBD within validated IBD peak region and generate a selection-corrected version of IBD for calling IBDNe and Infomap
+    - Remove IBD within validated IBD peak region and generate a
+    selection-corrected version of IBD for calling IBDNe and Infomap
 - Call `IBDNe` and `Infomap` for Ne and population structure inference
 
+## System requirements and Software environment
 
-## How to run the pipeline
+The pipeline has been tested on Linux Operation system and can be easily adapted to MacOS with
+simple changes. Software dependencies and the version numbers are specified in the
+'./env.yaml' Conda recipe. Additional depencies that are not available from Conda are
+specified in the installation instruction below. The overall installation time
+is about 5-15 minutes.
 
+To create the software environment:
 1. Install nextflow. See [nextflow documentation](https://www.nextflow.io/docs/latest/getstarted.html)
-2. Install software: `python3 ./init.py`, this will
-    - Install `simulation` Conda environment
+2. Install conda from [here](https://docs.conda.io/en/latest/miniconda.html) if you have not
+3. Install software: `python3 ./init.py`, this will
+    - Detect and Install `simulation` Conda environment
         - including [`ibdutils`](https://github.com/bguo068/ibdutils)
     - Download and compile [`tskibd`](https://github.com/bguo068/tskibd) for
     true IBD inference from tree sequence
     - Download
     [`IBDNe`](https://faculty.washington.edu/browning/ibdne/ibdne.23Apr20.ae9.jar)
-3. Activate the `simulation` environment: `conda activate simulation`
-4. Run the pipeline: `nextflow ../main.nf -profile sge --num_reps 30 -resume`. 
-5. Pipeline can be reconfigured in the following files
-    - SGE cluster and resource allocation can be found `nextflow.config` file
-    - Pipeline parameters can found top lines in `main.nf`
-    - More simulation parameters can be found in the defintion of
-     `sp_defaults`,`mp_defaults`, `sp_sets` and `mp_sets` dictionaries within `main.nf`
 
-## Input and Output
 
-1. No input needed. If desired, pipeline can be reconfigure as mentioned above.
+## How to run the pipeline
+
+1. Activate the `simulation` environment: `conda activate simulation`
+2. Run the pipeline: `nextflow ./main.nf -profile sge --num_reps 30 -resume`. 
+3. For large datasets, using a cluster such as SGE is recommended. An example
+`sge` profile is provided in the `nextflow.config` file and should be adjusted
+to fit your cluster system. If run on a local computer, please remove the
+`-profile sge` option from the above command.
+4. The pipeline can be reconfigured in the following files
+    - Pipeline parameters can be found top lines in `main.nf`
+    - More simulation parameters can be found in the definition of
+     `sp_defaults`,`mp_defaults`, `sp_sets` and `mp_sets` dictionaries within
+     the `main.nf` file
+
+## Input, Test Data and Output
+
+1. No input or test data is needed. If desired, pipeline can be reconfigured as
+mentioned above. The pipeline can be tested by commenting all but one entry in
+the `sp_sets` or `mp_sets`.
 2. Output files/folders:
     - each subfolder of `resdir` represents simulations for a set of chromosomes
     - within each subfolder:
