@@ -16,7 +16,15 @@ pa.add_argument("--ibdne_jar", type=str, default=ibd_jar_default)
 pa.add_argument("--ibdne_mincm", type=float, default=2)
 pa.add_argument("--ibdne_minregion", type=float, default=10)
 pa.add_argument("--ibdne_flatmeth", type=str, default="none")
+pa.add_argument(
+    "--ibdne_no_diploid_conversion",
+    type=str,
+    choices=["true", "false"],
+    default="false",
+)
 args = pa.parse_args()
+
+print(args)
 
 assert args.ibdne_jar is not None
 assert args.ibdne_flatmeth in ["none", "merge", "keep_hap_1_only"]
@@ -71,14 +79,17 @@ ibd.filter_ibd_by_length(min_seg_cm=ibdne_mincm)
 # calculate XiR,s
 xirs_df = ibd.calc_xirs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
 
-# convert to heterzygous diploids
-# Note: remove_hbd might not remove a lot segments as
-# hdb only involves n/2 pairs of a total of n(n-1)/2 pairs (ratio: 1/(n-1)).
-# When n is large, the difference is small
-ibd.convert_to_heterozygous_diploids(remove_hbd=True)
+if args.ibdne_no_diploid_conversion:
+    print("skip diploid conversion")
+else:
+    # convert to heterzygous diploids
+    # Note: remove_hbd might not remove a lot segments as
+    # hdb only involves n/2 pairs of a total of n(n-1)/2 pairs (ratio: 1/(n-1)).
+    # When n is large, the difference is small
+    ibd.convert_to_heterozygous_diploids(remove_hbd=True)
 
-if args.ibdne_flatmeth != "none":
-    ibd.flatten_diploid_ibd(method=args.ibdne_flatmeth)
+    if args.ibdne_flatmeth != "none":
+        ibd.flatten_diploid_ibd(method=args.ibdne_flatmeth)
 
 # calculate coverage and remove peaks
 ibd.calc_ibd_cov()
