@@ -98,9 +98,11 @@ s2 450: late()
 		mut = sim.mutationsOfType(m2);
 		nfixed = sum(sim.substitutions.mutationType == m2);
 		nmut = mut.size();
+		
+		
 		nlost = nchrs - nmut - nfixed;
 		catn(c("current", nmut, "lost", nlost, "fixed", nfixed));
-	
+		
 		need_restart = 0;
 		if (nfixed >= nchrs - 3)
 		{
@@ -121,16 +123,35 @@ s2 450: late()
 		else
 		{
 			catn(c("DAF", slim_total_generations - sim.cycle, "_FRQ_", sim.mutationFrequencies(p1, mut), "_POS_", mut.position,"_FIXPOS_", sim.substitutions.position ), sep='\t');
-			
+		
 		}
 	}
 }
 
 s3 500 late()
 {
-	sim.simulationFinished();
-	catn(c("restart_counter", restart_counter), sep='\t');
-	sim.treeSeqOutput(paste("tmp_slim_out_single_pop_", outid, ".trees", sep=''));
+	
+	mut = sim.mutationsOfType(m2);
+	nfixed = sum(sim.substitutions.mutationType == m2);
+	nmut = mut.size();
+	
+	nlowafreq = sum(p1.species.mutationFrequencies(p1, mut) < 0.2);
+	
+	if ((nlowafreq > 0)  &(sim_relatedness)){
+		catn(c("selected mutation with LOW ALLEL FREQUENCIES; restarting...", restart_counter));
+		sim.readFromPopulationFile(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
+		setSeed(rdunif(1, 0, asInteger(2^62 - 1)));
+		for (i in 1:nchrs){
+			sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos + (i-1) * L);
+		}
+		restart_counter = restart_counter + 1;
+	}
+	else{
+		// finish simulation only when there is no low allele frequency of selected mutations
+		sim.simulationFinished();
+		catn(c("restart_counter", restart_counter), sep='\t');
+		sim.treeSeqOutput(paste("tmp_slim_out_single_pop_", outid, ".trees", sep=''));
+	}
 }
 
 late()
