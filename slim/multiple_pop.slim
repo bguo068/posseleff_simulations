@@ -18,6 +18,10 @@ initialize()
 	set_default("max_restart", 100); // max number of restart
 	set_default("sim_relatedness", F); // whether simulate high relatedness
 
+	set_default("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
+	set_default("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
+	set_default("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
+
 	set_default('npop', 5); // number of subpopulations
 	set_default('sel_mig', 0.01); /// migration rate during the selective sweep
 	set_default("selection", ifelse(s != 0, "T", "F"));
@@ -35,36 +39,50 @@ initialize()
 	defineGlobal("restart_counter", 0);
 }
 
-s0 :10 modifyChild()
+// s0 :10 modifyChild()
+// {
+// 	// normal simulation or old generations, always return T
+// 	if (!sim_relatedness)
+// 		return T;
+
+// 	// migrant meet with no-migrant, always allow
+// 	if (parent1.migrant != parent2.migrant)
+// 		return T;
+
+// 	// use this to let 50% of candicate pass without checking pedegree relatedness
+// 	// so the Ne etimates are more stable
+// 	if (child.index % 2 == 0)
+// 		return T;
+// 	prob = parent1.relatedness(parent2);
+// 	if ((prob > 1.0 / 32) & (prob < 1.0 / 4))
+// 		return T;
+
+// 	// for unrelated samples return True with a small probability
+// 	else
+// 		return sample(c(T, F), size=1, replace=T, weights=c(1, 999));
+// }
+
+s0 9999:10000 mateChoice()
 {
-	// normal simulation or old generations, always return T
-	if (!sim_relatedness)
-		return T;
-
-	// migrant meet with no-migrant, always allow
-	if (parent1.migrant != parent2.migrant)
-		return T;
-
-	// use this to let 50% of candicate pass without checking pedegree relatedness
-	// so the Ne etimates are more stable
-	if (child.index % 2 == 0)
-		return T;
-	prob = parent1.relatedness(parent2);
-	if ((prob > 1.0 / 32) & (prob < 1.0 / 4))
-		return T;
-
-	// for unrelated samples return True with a small probability
-	else
-		return sample(c(T, F), size=1, replace=T, weights=c(1, 999));
+	rel = individual.relatedness(sourceSubpop.individuals);
+	return weights * (rel^sim_relatedness_power + sim_relatedness_delta);
 }
 
-// create populations
+
+// create populations and set time range for s0 script block
 1 early()
 {
 	for (i in 1:npop)
 	{
 		sim.addSubpop(paste("p", i, sep=""), N);
 	}
+
+	// move all script reschuling code to 1 early block
+	slim_total_generations = max(sim_relatedness_g, g_sel_start);
+	if (sim_relatedness ){
+		community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g  + 1);
+	}
+	community.rescheduleScriptBlock(s1, slim_total_generations, slim_total_generations);
 }
 
 function (void)restart_with_selection(void)
@@ -97,8 +115,6 @@ function (void)print_allele_frequencies(void)
 
 1 late()
 {
-	community.rescheduleScriptBlock(s0, g_sel_start - 40 + 1);
-	community.rescheduleScriptBlock(s1, g_sel_start, g_sel_start);
 	sim.treeSeqOutput(paste("tmp_slim_state_multiple_pop_", outid, ".trees", sep=''));
 	restart_with_selection();
 	print_allele_frequencies();

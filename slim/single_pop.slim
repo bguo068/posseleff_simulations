@@ -18,10 +18,14 @@ initialize()
 	set_default("max_restart", 100); // max number of restart
 	set_default("sim_relatedness", F); // whether simulate high relatedness
 
+	set_default("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
+	set_default("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
+	set_default("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
+
 	set_default("N0", 1000); // the effective population size at sampling time
 	set_default("g_ne_change_start", 200); // Ne change time (generations ago -- BACKWARD)
 	set_default("slim_total_generations", // time of simulation ended -- forward
-		max(g_sel_start, g_ne_change_start + 1) );
+		max(g_sel_start, g_ne_change_start + 1, sim_relatedness_g) );
 
 	initializeSLiMOptions(keepPedigrees=T);
 	initializeTreeSeq();
@@ -36,29 +40,19 @@ initialize()
 	defineGlobal("restart_counter", 1);
 }
 
-// Trick: only run modifyChild in the last twenty generations so its much faster
-s0:10 modifyChild()
+
+s0 9999:10000 mateChoice()
 {
-	if (!sim_relatedness)
-		return T; // normal simulation or old generations, always return T
-
-	// use this to let 50% of candicate pass without checking pedegree relatedness
-	// so the Ne etimates are more stable
-	if (child.index % 2 == 0)
-		return T;
-	prob = parent1.relatedness(parent2);
-	if ((prob > 1.0 / 32) & (prob < 1.0 / 4))
-		return T;
-
-	// for unrelated samples return True with a small probability
-	else
-		return sample(c(T, F), size=1, replace=T, weights=c(1, 999));
+	rel = individual.relatedness(sourceSubpop.individuals);
+	return weights * (rel^sim_relatedness_power + sim_relatedness_delta);
 }
 
 1 early()
 {
 	sim.addSubpop("p1", N);
-	community.rescheduleScriptBlock(s0, slim_total_generations - 40 + 1);
+	if (sim_relatedness ){
+		community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g  + 1);
+	}
 	community.rescheduleScriptBlock(s1, slim_total_generations - g_ne_change_start + 1);
 	community.rescheduleScriptBlock(s2, slim_total_generations - g_sel_start - 1, slim_total_generations); // minus 1 so that it allows the s2 code block the save the state
 	community.rescheduleScriptBlock(s3, slim_total_generations + 1, slim_total_generations + 1);
