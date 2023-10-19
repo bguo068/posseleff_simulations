@@ -6,3 +6,9 @@ modules/**
 resdir/**
 resdir*
 **/work
+run_notes.txt
+run4
+run_rep
+run_rep_filt_peaks
+run_rep_filt_peaks_3hits
+.vscode
