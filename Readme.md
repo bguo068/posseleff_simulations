@@ -115,3 +115,9 @@ https://doi.org/10.1073/pnas.0706851105
 
 ## Related Repository:
 `tskibd`: https://github.com/bguo068/tskibd
+
+
+## Inbreeding
+
+Branch 1: `inbreeding` focusing on modifying  simulation structure for multiple chromosome genome simulation for (Single-population model)
+branch 2: `inbreeding2` focusing on fine-tunning parameters for allow established selection
