@@ -132,7 +132,8 @@ class SlimMsprimeSimulatorForSinglePop:
             "g_sel_start": self.params.g_sel_start,
             "r": self.params.r,
             "outid": outid,
-            "max_restart": 100,
+            # change the default, 100 is not enough for multi-chromosome simulations
+            "max_restart": 100000,
             "sim_relatedness": self.params.sim_relatedness,
             "sim_relatedness_power": self.params.sim_relatedness_power,
             "sim_relatedness_delta": self.params.sim_relatedness_delta,
