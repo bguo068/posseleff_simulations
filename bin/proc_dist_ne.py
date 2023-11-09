@@ -16,6 +16,10 @@ pa.add_argument("--ibdne_jar", type=str, default=ibd_jar_default)
 pa.add_argument("--ibdne_mincm", type=float, default=2)
 pa.add_argument("--ibdne_minregion", type=float, default=10)
 pa.add_argument("--ibdne_flatmeth", type=str, default="none")
+# This can be used to specify which chromosome to use, especially when selection
+# is not established on some chromosomes and we only use those that are
+# established to better observe selection effects
+pa.add_argument("--ibdne_chrlist", type=int, nargs="+")
 pa.add_argument(
     "--ibdne_no_diploid_conversion",
     type=str,
@@ -95,15 +99,23 @@ else:
 ibd.calc_ibd_cov()
 ibd.find_peaks()
 
+
 ibd.filter_peaks_by_xirs(xirs_df)
-
-
-of_orig_ibdne_obj = f"{label_str}_orig.ibdne.ibdobj.gz"
-ibd.pickle_dump(of_orig_ibdne_obj)
 
 ibd2 = ibd.duplicate(f"{label_str}_rmpeaks")
 ibd2.remove_peaks()
 ibd2._df = ibd2.cut_and_split_ibd()
+
+
+# filter by chromosome for Ne
+if args.ibdne_chrlist is not None:
+    ibd._df = ibd._df[lambda df: df.Chromosome.isin(args.ibdne_chrlist)]
+    ibd2._df = ibd2._df[lambda df: df.Chromosome.isin(args.ibdne_chrlist)]
+
+# write ne file
+of_orig_ibdne_obj = f"{label_str}_orig.ibdne.ibdobj.gz"
+ibd.pickle_dump(of_orig_ibdne_obj)
+
 of_rmpeaks_ibdne_obj = f"{label_str}_rmpeaks.ibdne.ibdobj.gz"
 ibd2.pickle_dump(of_rmpeaks_ibdne_obj)
 
