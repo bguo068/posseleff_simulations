@@ -58,7 +58,13 @@ def sp_sets = [
     sp_neu: sp_defaults + [s: 0.0, genome_set_id: 10000],
     // sp_s01: sp_defaults + [s: 0.1, genome_set_id: 10001],
     // sp_s02: sp_defaults + [s: 0.2, genome_set_id: 10002],
-    sp_s03: sp_defaults + [s: 0.3, genome_set_id: 10003],
+    // sp_s03: sp_defaults + [s: 0.3, genome_set_id: 10003],
+    sp_s03: sp_defaults + [s: 0.3, genome_set_id: 10003, g_sel_start: 50, num_origins: 3, sim_relatedness: 0 ],
+
+    // temporary: need to fix genome-set-id conflicts if kept 
+    sp_s03_g80: sp_defaults + [s: 0.3, genome_set_id: 10004, g_sel_start: 80, num_origins: 3, sim_relatedness: 0 ],
+    sp_s03_g120: sp_defaults + [s: 0.3, genome_set_id: 10005, g_sel_start: 120, num_origins: 3, sim_relatedness: 0 ],
+    
     // sp_g040:sp_defaults + [g_sel_start: 40, genome_set_id: 10004],
     // sp_g080:sp_defaults + [g_sel_start: 80, genome_set_id: 10005],
     // sp_g120:sp_defaults + [g_sel_start:120, genome_set_id: 10006],
@@ -73,6 +79,7 @@ def sp_sets = [
     // FOR MODEL exploration
 
     // change inbreeding starting time (inbreeding transform parameter - power 10: more weights on closer relatives)
+    /*
     sp_rels03_11a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 10.0, sim_relatedness_g: 100, genome_set_id: 111000],
     sp_rels00_11a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 10.0, sim_relatedness_g: 100, genome_set_id: 110001],
     sp_rels03_11b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 10.0, sim_relatedness_g:  50, genome_set_id: 110002],
@@ -86,20 +93,21 @@ def sp_sets = [
     sp_rels00_12b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1.0,  sim_relatedness_g:  50, genome_set_id: 120003],
     sp_rels03_12c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1.0,  sim_relatedness_g:  25, genome_set_id: 120004],
     sp_rels00_12c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1.0,  sim_relatedness_g:  25, genome_set_id: 120005], ////////////
+    */
 
-    sp_rels03_13a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 130000],
-    sp_rels00_13a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 130001],
-    sp_rels03_13b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 130002],
-    sp_rels00_13b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 130003],
-    sp_rels03_13c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 130004],
-    sp_rels00_13c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 130005],//////////////
+    // sp_rels03_13a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 130000],
+    // sp_rels00_13a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 130001],
+    // sp_rels03_13b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 130002],
+    // sp_rels00_13b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 130003],
+    // sp_rels03_13c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 130004],
+    // sp_rels00_13c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 130005],//////////////
 
-    sp_rels03_14a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 140000],
-    sp_rels00_14a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 140001],
-    sp_rels03_14b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 140002],
-    sp_rels00_14b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 140003],
-    sp_rels03_14c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 140004],
-    sp_rels00_14c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 140005],//////////////
+    // sp_rels03_14a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 140000],
+    // sp_rels00_14a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 140001],
+    // sp_rels03_14b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 140002],
+    // sp_rels00_14b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 140003],
+    // sp_rels03_14c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 140004],
+    // sp_rels00_14c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 140005],//////////////
 
 /*
     sp_rels03_15a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-4, sim_relatedness_g: 100, genome_set_id: 150000],
@@ -139,6 +147,7 @@ def sp_sets = [
     */
 
     // change inbreeding starting time (inbreeding transform parameter - power 1: linear)
+    /*
     sp_rels03_21a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 10.0, sim_relatedness_g: 100, genome_set_id: 211000],
     sp_rels00_21a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 10.0, sim_relatedness_g: 100, genome_set_id: 210001],
     sp_rels03_21b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 10.0, sim_relatedness_g:  50, genome_set_id: 210002],
@@ -152,18 +161,19 @@ def sp_sets = [
     sp_rels00_22b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1.0,  sim_relatedness_g:  50, genome_set_id: 220003],
     sp_rels03_22c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 1.0,  sim_relatedness_g:  25, genome_set_id: 220004],
     sp_rels00_22c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1.0,  sim_relatedness_g:  25, genome_set_id: 220005], ////////////
+    */
 
-    sp_rels03_23a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 230000],
-    sp_rels00_23a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 230001],
-    sp_rels03_23b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 230002],
-    sp_rels00_23b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 230003],
+    // sp_rels03_23a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 230000],
+    // sp_rels00_23a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 230001],
+    // sp_rels03_23b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 230002],
+    // sp_rels00_23b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 230003],
     sp_rels03_23c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 230004],
     sp_rels00_23c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 230005],//////////////
 
-    sp_rels03_24a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 240000],
-    sp_rels00_24a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 240001],
-    sp_rels03_24b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 240002],
-    sp_rels00_24b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 240003],
+    // sp_rels03_24a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 240000],
+    // sp_rels00_24a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 240001],
+    // sp_rels03_24b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 240002],
+    // sp_rels00_24b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 240003],
     sp_rels03_24c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 240004],
     sp_rels00_24c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1.0, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 240005],//////////////
 /*
@@ -204,6 +214,7 @@ def sp_sets = [
 */
 
     // change inbreeding starting time (inbreeding transform parameter - power 0.1: more weights on relatives, but will put more weights on very close relatives)
+    /*
     sp_rels03_31a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 10.0, sim_relatedness_g: 100, genome_set_id: 311000],
     sp_rels00_31a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 10.0, sim_relatedness_g: 100, genome_set_id: 310001],
     sp_rels03_31b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 10.0, sim_relatedness_g:  50, genome_set_id: 310002],
@@ -217,20 +228,21 @@ def sp_sets = [
     sp_rels00_32b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1.0,  sim_relatedness_g:  50, genome_set_id: 320003],
     sp_rels03_32c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1.0,  sim_relatedness_g:  25, genome_set_id: 320004],
     sp_rels00_32c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1.0,  sim_relatedness_g:  25, genome_set_id: 320005], ////////////
+    */
 
-    sp_rels03_33a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 330000],
-    sp_rels00_33a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 330001],
-    sp_rels03_33b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 330002],
-    sp_rels00_33b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 330003],
-    sp_rels03_33c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 330004],
-    sp_rels00_33c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 330005],//////////////
+    // sp_rels03_33a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 330000],
+    // sp_rels00_33a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 330001],
+    // sp_rels03_33b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 330002],
+    // sp_rels00_33b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 330003],
+    // sp_rels03_33c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 330004],
+    // sp_rels00_33c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 330005],//////////////
 
-    sp_rels03_34a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 340000],
-    sp_rels00_34a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 340001],
-    sp_rels03_34b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 340002],
-    sp_rels00_34b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 340003],
-    sp_rels03_34c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 340004],
-    sp_rels00_34c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 340005],//////////////
+    // sp_rels03_34a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 340000],
+    // sp_rels00_34a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g: 100, genome_set_id: 340001],
+    // sp_rels03_34b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 340002],
+    // sp_rels00_34b: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  50, genome_set_id: 340003],
+    // sp_rels03_34c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 340004],
+    // sp_rels00_34c: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.0, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-3, sim_relatedness_g:  25, genome_set_id: 340005],//////////////
 
 /*
     sp_rels03_35a: sp_defaults + [g_sel_start: 50, num_origins: 3, sim_relatedness: 1, s: 0.3, sim_relatedness_power: 0.1, sim_relatedness_delta: 1e-4, sim_relatedness_g: 100, genome_set_id: 350000],
@@ -612,25 +624,26 @@ workflow WF_SP {
             vcf.collect{v-> [label, v.getSimpleName().split("_")[-1].toInteger(), v]}
         } 
         ch_trees_vcf = ch_trees.combine(ch_vcf, by:[0,1])
+
+        // chr list of DAF > params.min_ibdne_chr_min_afreq
+        DAF_TO_CHRLIST(SIM_SP_GW.out.daf)
+        ch_chrlist = DAF_TO_CHRLIST.out
+
     } else{
         SIM_SP_CHR(ch_sp_params.combine(chr_chrno).map{a,b,c->[a,c,b]})
         ch_trees_vcf = SIM_SP_CHR.out.trees_vcf
+
+        // make chr list with all chromosomes when simulate chromosome independently
+        ch_chrlist = ch_sp_params.map {label, _args -> 
+            def chrlist_str = (1..14).join(" ")
+            [label,chrlist_str ]
+        }
     }
-    
-    DAF_TO_CHRLIST(SIM_SP_GW.out.daf)
-    ch_chrlist = DAF_TO_CHRLIST.out
-    // ch_chrlist.take(1).view()
-    
-//    ch_trees_vcf.combine(ch_sp_params, by:0)
- //       .map{label,chrno,trees,vcf,args-> [label,chrno, args, trees, vcf]}.take(1).view()
 
     // CALL IBD segment per chromosome
     CALL_IBD(ch_trees_vcf.combine(ch_sp_params, by:0)
         .map{label,chrno,trees,vcf,args-> [label,chrno, args, trees, vcf]}
     )
-    // CALL_IBD.out.tskibd.view{label, chrno, ibd -> [label, chrno, ibd.getName()]}
-
-
 
     // COLLECT PER SETS
     ch_ibd_per_genome = CALL_IBD.out.tskibd
@@ -645,14 +658,9 @@ workflow WF_SP {
             [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
         .combine(ch_chrlist, by:0) // add chrlist
 
-    // ch_ibd_per_genome.take(1).view()
-    // ch_ibd_per_genome.view{label, trees_lst, genome_set_id->
-    //        [label, trees_lst.collect{it.getName()}, genome_set_id]}
-
 
     // Process IBD for ibd distribution and ne analyses
     PROC_DIST_NE(ch_ibd_per_genome)
-    // PROC_DIST_NE.out.ibddist_ibd_obj.view{label, ibdpq -> [label, ibdpq.getName()]}
 
 
     // RUN IBDNe actually
@@ -663,8 +671,6 @@ workflow WF_SP {
             PROC_DIST_NE.out.ne_input_rmpeaks.map{it -> it + true}.map{it-> it + expanded_sets[it[0]]}
         )
     )
-
-    // RUN_IBDNE.out.map{label, yn, ne->[label, yn, ne.getName()]}.view()
     
 
 }
