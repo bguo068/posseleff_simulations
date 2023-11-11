@@ -295,28 +295,28 @@ def mp_sets = [
     // mp_rels00: mp_defaults + [sim_relatedness: 1, s: 0.0, genome_set_id: 30003],
 
     // FOR MODEL exploration
-    mp_rels03a: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g: 200, genome_set_id: 70000],
-    mp_rels00a: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g: 200, genome_set_id: 70001],
-    mp_rels03b: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 70002],
-    mp_rels00b: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 70003],
-    mp_rels03c: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 70004],
-    mp_rels00c: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 70005],
+    mp_rels03a: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 70000],
+    mp_rels00a: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 70001],
+    mp_rels03b: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 70002],
+    mp_rels00b: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 70003],
+    mp_rels03c: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 70004],
+    mp_rels00c: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1, sim_relatedness_delta: 0.01, sim_relatedness_g:  25, genome_set_id: 70005],
 
     // change inbreeding starting time (inbreeding transform parameter - power 10: more weights on closer relatives)
-    mp_rels03d: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 200, genome_set_id: 80000],
-    mp_rels00d: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 200, genome_set_id: 80001],
-    mp_rels03e: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 80002],
-    mp_rels00e: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g: 100, genome_set_id: 80003],
-    mp_rels03f: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 80004],
-    mp_rels00f: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 0.01, sim_relatedness_g:  50, genome_set_id: 80005],
+    mp_rels03d: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1 , sim_relatedness_delta: 0.001, sim_relatedness_g: 100, genome_set_id: 80000],
+    mp_rels00d: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1 , sim_relatedness_delta: 0.001, sim_relatedness_g: 100, genome_set_id: 80001],
+    mp_rels03e: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1 , sim_relatedness_delta: 0.001, sim_relatedness_g:  50, genome_set_id: 80002],
+    mp_rels00e: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1 , sim_relatedness_delta: 0.001, sim_relatedness_g:  50, genome_set_id: 80003],
+    mp_rels03f: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1 , sim_relatedness_delta: 0.001, sim_relatedness_g:  25, genome_set_id: 80004],
+    mp_rels00f: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1 , sim_relatedness_delta: 0.001, sim_relatedness_g:  25, genome_set_id: 80005],
 
     // change inbreeding starting time (inbreeding transform parameter - power 10: more weights on closer relatives, inbreeding transform parameter -- delta: smaller)
-    mp_rels03g: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-8, sim_relatedness_g: 200, genome_set_id: 90000],
-    mp_rels00g: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-8, sim_relatedness_g: 200, genome_set_id: 90001],
-    mp_rels03h: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-8, sim_relatedness_g: 100, genome_set_id: 90002],
-    mp_rels00h: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-8, sim_relatedness_g: 100, genome_set_id: 90003],
-    mp_rels03i: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 10, sim_relatedness_delta: 1e-8, sim_relatedness_g:  50, genome_set_id: 90004],
-    mp_rels00i: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 10, sim_relatedness_delta: 1e-8, sim_relatedness_g:  50, genome_set_id: 90005],
+    mp_rels03g: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1 , sim_relatedness_delta: 1e-4, sim_relatedness_g: 100, genome_set_id: 90000],
+    mp_rels00g: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1 , sim_relatedness_delta: 1e-4, sim_relatedness_g: 100, genome_set_id: 90001],
+    mp_rels03h: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1 , sim_relatedness_delta: 1e-4, sim_relatedness_g:  50, genome_set_id: 90002],
+    mp_rels00h: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1 , sim_relatedness_delta: 1e-4, sim_relatedness_g:  50, genome_set_id: 90003],
+    mp_rels03i: mp_defaults + [sim_relatedness: 1, s: 0.3, sim_relatedness_power: 1 , sim_relatedness_delta: 1e-4, sim_relatedness_g:  25, genome_set_id: 90004],
+    mp_rels00i: mp_defaults + [sim_relatedness: 1, s: 0.0, sim_relatedness_power: 1 , sim_relatedness_delta: 1e-4, sim_relatedness_g:  25, genome_set_id: 90005],
 ]
 
 
@@ -681,6 +681,8 @@ workflow WF_MP {
     
     // println("\n\n------------- Multiple Population Sets-------------")
     // mp_sets.each{k, v -> println("${k}\t\t${v}")}
+    def nchrom = 14
+    if (params.sim_inbreeding){ nchrom = 1 }
 
     def expanded_sets = [:]
 
@@ -700,7 +702,7 @@ workflow WF_MP {
     }
 
     // SIMULATE chromosomes
-    chr_chrno = channel.from(1..14)
+    chr_chrno = channel.from(1..nchrom)
     ch_mp_params = channel.from(expanded_sets.collect{k, v-> [k, v]})
 
     if (params.test) {
@@ -710,8 +712,6 @@ workflow WF_MP {
     }
 
     SIM_MP_CHR(ch_mp_params.combine(chr_chrno).map{a,b,c->[a,c,b]})
-    // SIM_MP_CHR.out.trees_vcf.view{it-> 
-    //    "${it[0]}\t${it[1]}\t${it[2].getName()}\t${it[3].getName()}"}
 
 
 
@@ -719,7 +719,6 @@ workflow WF_MP {
     CALL_IBD(SIM_MP_CHR.out.trees_vcf.combine(ch_mp_params, by:0)
         .map{label,chrno,trees,vcf,args-> [label,chrno, args, trees, vcf]}
     )
-    // CALL_IBD.out.tskibd.view{label, chrno, ibd -> [label, chrno, ibd.getName()]}
 
 
     // COLLECT PER SETS
@@ -728,20 +727,14 @@ workflow WF_MP {
         // trees_vcf: label, chrno, tree, vcf
         .combine(SIM_MP_CHR.out.trees_vcf.map{it[[0, 1, 3]]}, by: [0, 1])
         .map{ label, chrno, ibd, vcf -> 
-            [groupKey(label, 14), [chrno, ibd, vcf]] }
+            [groupKey(label, nchrom), [chrno, ibd, vcf]] }
         .groupTuple(by:0, sort: {x,y-> x[0]<=>y[0] })
         .combine(ch_mp_params, by:0)
         .map{label, ll, args-> 
             [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
 
-    // ch_ibd_per_genome.view{label, trees_lst, genome_set_id->
-    //        [label, trees_lst.collect{it.getName()}, genome_set_id]}
-
-
     // Process IBD for ibd distribution and ne analyses
     PROC_INFOMAP(ch_ibd_per_genome)
-    
-    // PROC_INFOMAP.out.ifm_orig_ibd_ob.view{label, ibdpq -> [label, ibdpq.getName()]}
 
 
     // RUN INFOMAP
@@ -750,8 +743,6 @@ workflow WF_MP {
             PROC_INFOMAP.out.ifm_rmpeaks_ibd_obj.map{it -> it + true}.combine(ch_mp_params, by:0)
         )
     )
-
-    // RUN_INFOMAP.out.view{label, yns, member -> [label, yns, member.getName()]}
 
 }
 

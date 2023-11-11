@@ -1,19 +1,33 @@
 #! /usr/bin/env python3
 
-import ibdutils.utils.ibdutils as ibdutils
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+
+import ibdutils.utils.ibdutils as ibdutils
 
 # parse arguments
 pa = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-pa.add_argument("--ibd_files", type=str, nargs=14, required=True)
-pa.add_argument("--vcf_files", type=str, nargs=14, required=True)
+pa.add_argument("--ibd_files", type=str, nargs="+", required=True)
+pa.add_argument("--vcf_files", type=str, nargs="+", required=True)
 pa.add_argument("--genome_set_id", type=int, required=True)
 args = pa.parse_args()
 
+# use the number files to indicate the number of chromosome included
+# in the genome_set
+nchrom = len(args.ibd_files)
+assert nchrom == len(args.vcf_files), "ibd /vcf file lists should be of the same length"
+
+# genome
+if nchrom == 1:
+    genome = ibdutils.Genome.get_genome_simple_simu(
+        r=0.01 / 15000, nchroms=1, seqlen_bp_chr=100 * 15000
+    )
+elif nchrom == 14:
+    genome = ibdutils.Genome.get_genome("simu_14chr_100cm")
+else:
+    raise NotImplemented("nchrom can only be 1 or 14")
 
 # read ibd
-genome_14_100 = ibdutils.Genome.get_genome("simu_14chr_100cm")
-ibd = ibdutils.IBD(genome=genome_14_100, label="orig")
+ibd = ibdutils.IBD(genome=genome, label="orig")
 ibd.read_ibd(ibd_fn_lst=args.ibd_files)
 
 

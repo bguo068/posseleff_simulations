@@ -142,6 +142,7 @@ function (void)print_allele_frequencies(void)
 s1 100 late()
 {
 	retry = restart_counter <= max_restart;
+	nfixed = sum(sim.substitutions.mutationType == m2);
 	afreq = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
 	acnt = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
 	if (selection & retry & acnt == 0)
@@ -149,7 +150,7 @@ s1 100 late()
 		catn("restart due to loss of m2 in p2 population");
 		restart_with_selection();
 	}
-	else if (selection & retry & afreq < 0.5)
+	else if (selection & retry & afreq < 0.5 & nfixed < 1)
 	{
 		catn("restart due to low allele frequency of m2 in p1 population");
 		restart_with_selection();
