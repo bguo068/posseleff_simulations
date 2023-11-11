@@ -1,0 +1,1 @@
+delta 0.001, there seems to be a drop when inbreeding starts
