@@ -1,30 +1,30 @@
+function (void)tryDefineConstant(string$ k, * v)
+{
+	if (!exists(k))
+		defineConstant(k, v);
+	return;
+}
+
 function (void)set_default_params(void)
 {
-	d = Dictionary();
-	d.setValue("L", 750000); // chromosome length in bp
-	d.setValue("selpos", asInteger(L / 3)); // selection position in bp
-	d.setValue("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
-	d.setValue("N", 10000); // constant effective population size
-	d.setValue("h", 0.5); // dominant coefficient
-	d.setValue("s", 0.3); // selection coefficient
-	d.setValue("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
-	d.setValue("r", 6.67e-7); // recombinantion rate
-	d.setValue("outid", 1); // idx
-	d.setValue("max_restart", 100); // max number of restart
-	d.setValue("sim_relatedness", F); // whether simulate high relatedness
-	d.setValue("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
-	d.setValue("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
-	d.setValue("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
-	d.setValue("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
-	d.setValue('npop', 5); // number of subpopulations
-	d.setValue('sel_mig', 0.01); /// migration rate during the selective sweep
-	d.setValue("selection", ifelse(s != 0, T, F));
-	for (k in d.allKeys)
-	{
-		v = d.getValue(k);
-		if (!exists(k))
-			defineConstant(k, v);
-	}
+	tryDefineConstant("L", 750000); // chromosome length in bp
+	tryDefineConstant("selpos", asInteger(L / 3)); // selection position in bp
+	tryDefineConstant("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
+	tryDefineConstant("N", 10000); // constant effective population size
+	tryDefineConstant("h", 0.5); // dominant coefficient
+	tryDefineConstant("s", 0.3); // selection coefficient
+	tryDefineConstant("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
+	tryDefineConstant("r", 6.67e-7); // recombinantion rate
+	tryDefineConstant("outid", 1); // idx
+	tryDefineConstant("max_restart", 100); // max number of restart
+	tryDefineConstant("sim_relatedness", F); // whether simulate high relatedness
+	tryDefineConstant("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
+	tryDefineConstant("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
+	tryDefineConstant("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
+	tryDefineConstant("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
+	tryDefineConstant('npop', 5); // number of subpopulations
+	tryDefineConstant('sel_mig', 0.01); /// migration rate during the selective sweep
+	tryDefineConstant("selection", ifelse(s != 0, T, F));
 	return;
 }
 
@@ -79,8 +79,8 @@ initialize()
 	defineGlobal("restart_counter", 0);
 }
 
-// for inbreeding
-s0:10 modifyChild()
+// for inbreeding (set default time range out of simulation window so is not used by default)
+s0 10000:10001 modifyChild()
 {
 	// migrant meet with no-migrant, always allow
 	if (parent1.migrant != parent2.migrant)
