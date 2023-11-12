@@ -739,7 +739,7 @@ workflow WF_MP {
 
     // RUN INFOMAP
     RUN_INFOMAP(
-        PROC_INFOMAP.out.ifm_orig_ibd_obj.map{it -> it + false}.combine(ch_mp_params, by:0).concat(
+        PROC_INFOMAP.out.ifm_orig_ibd_obj.map{it -> it + false}.combine(ch_mp_params, by:0).mix(
             PROC_INFOMAP.out.ifm_rmpeaks_ibd_obj.map{it -> it + true}.combine(ch_mp_params, by:0)
         )
     )
