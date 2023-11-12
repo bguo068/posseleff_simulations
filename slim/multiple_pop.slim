@@ -1,52 +1,67 @@
-function (void) set_default(string k, lifs v) {
-	if(!exists(k)) defineConstant(k, v);
+function (void)set_default_params(void)
+{
+	d = Dictionary();
+	d.setValue("L", 750000); // chromosome length in bp
+	d.setValue("selpos", asInteger(L / 3)); // selection position in bp
+	d.setValue("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
+	d.setValue("N", 10000); // constant effective population size
+	d.setValue("h", 0.5); // dominant coefficient
+	d.setValue("s", 0.3); // selection coefficient
+	d.setValue("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
+	d.setValue("r", 6.67e-7); // recombinantion rate
+	d.setValue("outid", 1); // idx
+	d.setValue("max_restart", 100); // max number of restart
+	d.setValue("sim_relatedness", F); // whether simulate high relatedness
+	d.setValue("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
+	d.setValue("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
+	d.setValue("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
+	d.setValue("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
+	d.setValue('npop', 5); // number of subpopulations
+	d.setValue('sel_mig', 0.01); /// migration rate during the selective sweep
+	d.setValue("selection", ifelse(s != 0, T, F));
+	for (k in d.allKeys)
+	{
+		v = d.getValue(k);
+		if (!exists(k))
+			defineConstant(k, v);
+	}
 	return;
 }
-function (void) print_params(void) {
-	catn(c("Parameter", "L", L), sep='\t');
-	catn(c("Parameter", "selpos", selpos), sep='\t');
-	catn(c("Parameter", "num_origins", num_origins), sep='\t');
-	catn(c("Parameter", "N", N), sep='\t');
-	catn(c("Parameter", "h", h), sep='\t');
-	catn(c("Parameter", "s", s), sep='\t');
-	catn(c("Parameter", "g_sel_start", g_sel_start), sep='\t');
-	catn(c("Parameter", "r",r ), sep='\t');
-	catn(c("Parameter", "outid", outid), sep='\t');
-	catn(c("Parameter", "max_restart", max_restart), sep='\t');
-	catn(c("Parameter", "sim_relatedness", sim_relatedness), sep='\t');
-	catn(c("Parameter", "sim_relatedness_power", sim_relatedness_power), sep='\t');
-	catn(c("Parameter", "sim_relatedness_delta", sim_relatedness_delta), sep='\t');
-	catn(c("Parameter", "sim_relatedness_g", sim_relatedness_g), sep='\t');
-	catn(c("Parameter", "npop", npop), sep='\t');
-	catn(c("Parameter", "sel_mig", sel_mig), sep='\t');
-	catn(c("Parameter", "selection", selection), sep='\t');
-	return;						
+
+function (void)print_params(void)
+{
+	d = Dictionary();
+	d.setValue("L", L);
+	d.setValue("selpos", selpos);
+	d.setValue("num_origins", num_origins);
+	d.setValue("N", N);
+	d.setValue("h", h);
+	d.setValue("s", s);
+	d.setValue("g_sel_start", g_sel_start);
+	d.setValue("outid", outid);
+	d.setValue("max_restart", max_restart);
+	d.setValue("r", r);
+	d.setValue("sim_relatedness", sim_relatedness);
+	d.setValue("sim_relatedness_power", sim_relatedness_power);
+	d.setValue("sim_relatedness_delta", sim_relatedness_delta);
+	d.setValue("sim_relatedness_g", sim_relatedness_g);
+	d.setValue("sim_relatedness_bypass", sim_relatedness_bypass);
+	d.setValue("npop", npop);
+	d.setValue("sel_mig", sel_mig);
+	d.setValue("selection", selection);
+	for (k in d.allKeys)
+	{
+		catn(c("PARAMETER", k, d.getValue(k)), sep='\t');
+	}
+	return;
 }
 
 initialize()
 {
-	set_default("L", 750000); // chromosome length in bp
-	set_default("selpos", asInteger(L / 3)); // selection position in bp
-	set_default("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
-	set_default("N", 10000); // constant effective population size
-	set_default("h", 0.5);  // dominant coefficient
-	set_default("s", 0.3); // selection coefficient
-	set_default("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
-	set_default("r", 6.67e-7); // recombinantion rate
-	set_default("outid", 1); // idx
-	set_default("max_restart", 100); // max number of restart
-	set_default("sim_relatedness", F); // whether simulate high relatedness
-
-	set_default("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
-	set_default("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
-	set_default("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
-
-	set_default('npop', 5); // number of subpopulations
-	set_default('sel_mig', 0.01); /// migration rate during the selective sweep
-	set_default("selection", ifelse(s != 0, T, F));
-	
+	set_default_params();
 	print_params();
-
+	
+	// initialization
 	initializeSLiMOptions(keepPedigrees=T);
 	initializeTreeSeq();
 	initializeMutationRate(0.0);
@@ -55,41 +70,52 @@ initialize()
 	initializeGenomicElementType("g1", m1, 1.0);
 	initializeGenomicElement(g1, 0, L - 1);
 	initializeRecombinationRate(r);
-
+	
+	// add 10 generations so that there is some pedigree information when inbreeding starts
+	defineConstant("slim_total_generations", max(sim_relatedness_g, g_sel_start) + 10);
+	defineConstant("debug", F);
+	
 	// define global
 	defineGlobal("restart_counter", 0);
 }
 
-// s0 :10 modifyChild()
-// {
-// 	// normal simulation or old generations, always return T
-// 	if (!sim_relatedness)
-// 		return T;
-
-// 	// migrant meet with no-migrant, always allow
-// 	if (parent1.migrant != parent2.migrant)
-// 		return T;
-
-// 	// use this to let 50% of candicate pass without checking pedegree relatedness
-// 	// so the Ne etimates are more stable
-// 	if (child.index % 2 == 0)
-// 		return T;
-// 	prob = parent1.relatedness(parent2);
-// 	if ((prob > 1.0 / 32) & (prob < 1.0 / 4))
-// 		return T;
-
-// 	// for unrelated samples return True with a small probability
-// 	else
-// 		return sample(c(T, F), size=1, replace=T, weights=c(1, 999));
-// }
-
-s0 9999:10000 mateChoice()
+// for inbreeding
+s0:10 modifyChild()
 {
-	rel = individual.relatedness(sourceSubpop.individuals);
-	return weights * (rel^sim_relatedness_power + sim_relatedness_delta);
+	// migrant meet with no-migrant, always allow
+	if (parent1.migrant != parent2.migrant)
+		return T;
+	
+	// use this to let 50% of candicate pass without checking pedegree relatedness
+	// so the Ne etimates are more stable
+	if (child.index % sim_relatedness_bypass != 0)
+		return T;
+	prob = parent1.relatedness(parent2);
+	if (prob >= 1.0 / sim_relatedness_power)
+		return T;
+	else
+		return sample(c(T, F), size=1, replace=T, weights=c(sim_relatedness_delta, 1));
 }
 
-
+// // NOTE: this seems to be too slow for large population size
+//s0 9999:10000 mateChoice()
+//{
+//	// if any of two parents is a recent migrant, the acceptance is set to 
+//	// an average relatedness value. 
+//	// this helps migrant to enter the target population as
+//	// migrant tends to have low pedigree-based relatedess and 
+//	// are excluded in the next generation
+//	if(individual.migrant){
+//		return weights;
+//	}
+//	else{
+//		rel = individual.relatedness(sourceSubpop.individuals);
+//		m = mean(rel);
+//		rel[sourceSubpop.individuals.migrant] = m;
+//		return weights * (rel^sim_relatedness_power + sim_relatedness_delta);
+//	}
+//}
+//
 // create populations and set time range for s0 script block
 1 early()
 {
@@ -97,30 +123,35 @@ s0 9999:10000 mateChoice()
 	{
 		sim.addSubpop(paste("p", i, sep=""), N);
 	}
-
-	// move all script reschuling code to 1 early block
-	slim_total_generations = max(sim_relatedness_g, g_sel_start);
-	if (sim_relatedness ){
-		community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g  + 1);
+	
+	// script rescheduling code to 1 early block
+	if (sim_relatedness)
+	{
+		// for inbreeding
+		community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g + 1);
 	}
-	community.rescheduleScriptBlock(s1, slim_total_generations, slim_total_generations);
 }
 
 function (void)restart_with_selection(void)
 {
 	sim.readFromPopulationFile(paste("tmp_slim_state_multiple_pop_", outid, ".trees", sep=''));
 	for (i in 2:npop)
-
+		
 		// subpopulation index from 0, but pop index is from 1
 		sim.subpopulations[i - 1].setMigrationRates(i - 1, sel_mig);
 	setSeed(rdunif(1, 0, asInteger(2^62 - 1)));
-	target = sample(p1.genomes, num_origins);
-	target.addNewDrawnMutation(m2, asInteger(selpos) - 1);
+	if (selection)
+	{
+		print("selection in restart");
+		target = sample(p1.genomes, num_origins);
+		target.addNewDrawnMutation(m2, asInteger(selpos) - 1);
+	}
 	restart_counter = restart_counter + 1;
 }
 
 function (void)print_allele_frequencies(void)
 {
+	g_ago = slim_total_generations - sim.cycle;
 	if (sim.countOfMutationsOfType(m2))
 	{
 		//npop = length(sim.subpopulations);
@@ -130,56 +161,83 @@ function (void)print_allele_frequencies(void)
 			pop = sim.subpopulations[i];
 			af[i] = sim.mutationFrequencies(pop, sim.mutationsOfType(m2));
 		}
-		catn(c("DAF", restart_counter, g_sel_start - sim.cycle, af), sep='\t');
-	}
-}
-
-1 late()
-{
-	sim.treeSeqOutput(paste("tmp_slim_state_multiple_pop_", outid, ".trees", sep=''));
-	restart_with_selection();
-	print_allele_frequencies();
-}
-
-2: late()
-{
-	retry = restart_counter <= max_restart;
-	acnt = sum(sim.mutationCounts(p1, sim.mutationsOfType(m2)));
-	mutcnt = sim.countOfMutationsOfType(m2);
-	if (selection & retry & mutcnt == 0)
-	{
-		catn("restart due to loss of m2 in whole population");
-		restart_with_selection();
-	}
-	else if (selection & retry & acnt == 0)
-	{
-		catn("restart due to loss of m2 in p1 population");
-		restart_with_selection();
-	}
-	print_allele_frequencies();
-}
-
-// This time is rescheduled
-s1 100 late()
-{
-	retry = restart_counter <= max_restart;
-	nfixed = sum(sim.substitutions.mutationType == m2);
-	afreq = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
-	acnt = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
-	if (selection & retry & acnt == 0)
-	{
-		catn("restart due to loss of m2 in p2 population");
-		restart_with_selection();
-	}
-	else if (selection & retry & afreq < 0.5 & nfixed < 1)
-	{
-		catn("restart due to low allele frequency of m2 in p1 population");
-		restart_with_selection();
+		catn(c("DAF", restart_counter, g_ago, af), sep='\t');
 	}
 	else
 	{
-		catn(c("restart count", restart_counter), sep='\t');
-		sim.treeSeqOutput(paste("tmp_slim_out_multiple_pop_", outid, ".trees", sep=''));
-		sim.simulationFinished();
+		catn(c("NON_M2", restart_counter, g_ago), sep='\t');
+	}
+}
+
+1:100000 late()
+{
+	g_ago = slim_total_generations - sim.cycle;
+	catn(c("GENERATION_AGO:", g_ago, "-----------------"), sep="\t");
+	
+	// start selection
+	if (g_ago == g_sel_start)
+	{
+		sim.treeSeqOutput(paste("tmp_slim_state_multiple_pop_", outid, ".trees", sep=''));
+		restart_with_selection();
+		print_allele_frequencies();
+	}
+	
+	// monitor and restart if necessary
+	if (g_ago < g_sel_start)
+	{
+		retry = restart_counter <= max_restart;
+		acnt = sum(sim.mutationCounts(p1, sim.mutationsOfType(m2)));
+		mutcnt = sim.countOfMutationsOfType(m2);
+		if (selection & retry & mutcnt == 0)
+		{
+			catn("restart due to loss of m2 in whole population");
+			restart_with_selection();
+		}
+		else if (selection & retry & acnt == 0)
+		{
+			catn("restart due to loss of m2 in p1 population");
+			restart_with_selection();
+		}
+		print_allele_frequencies();
+	}
+	
+	// debug only (check pedigree-relatedness distribution per generation)
+	if (debug)
+	{
+		rmat = p1.individuals.relatedness(p1.individuals);
+		m = mean(rmat);
+		u = sort(unique(rmat));
+		values = c(0.0, 0.0625, 0.125, 0.1875, 0.25, 0.3125, 0.375, 0.4375, 0.5, 0.5625, 0.625, 0.75, 1.0);
+		counts = rep(0, 13);
+		for (i in 0:12)
+		{
+			counts[i] = sum(rmat == values[i]);
+		}
+		catn(c("CYCLE: ", sim.cycle, "P1_AVG_RELATEDNESS: ", m, "\n", "Unique:", u, "\n", "UNIQUE:", values, "\n", "COUNTS:", counts), sep='\t');
+	}
+	
+	// last generation, restart if necessary
+	if (g_ago == 0)
+	{
+		retry = restart_counter <= max_restart;
+		nfixed = sum(sim.substitutions.mutationType == m2);
+		afreq = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
+		acnt = sum(sim.mutationCounts(p2, sim.mutationsOfType(m2)));
+		if (selection & retry & acnt == 0)
+		{
+			catn("restart due to loss of m2 in p2 population");
+			restart_with_selection();
+		}
+		else if (selection & retry & afreq < 0.5 & nfixed < 1)
+		{
+			catn("restart due to low allele frequency of m2 in p1 population");
+			restart_with_selection();
+		}
+		else
+		{
+			catn(c("restart count", restart_counter), sep='\t');
+			sim.treeSeqOutput(paste("tmp_slim_out_multiple_pop_", outid, ".trees", sep=''));
+			sim.simulationFinished();
+		}
 	}
 }
