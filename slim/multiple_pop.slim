@@ -1,7 +1,26 @@
-function (NULL) set_default(string k, lifs v) {
+function (void) set_default(string k, lifs v) {
 	if(!exists(k)) defineConstant(k, v);
-	catn(c("Parameter", k, v), sep='\t');
-	return NULL;
+	return;
+}
+function (void) print_params(void) {
+	catn(c("Parameter", "L", L), sep='\t');
+	catn(c("Parameter", "selpos", selpos), sep='\t');
+	catn(c("Parameter", "num_origins", num_origins), sep='\t');
+	catn(c("Parameter", "N", N), sep='\t');
+	catn(c("Parameter", "h", h), sep='\t');
+	catn(c("Parameter", "s", s), sep='\t');
+	catn(c("Parameter", "g_sel_start", g_sel_start), sep='\t');
+	catn(c("Parameter", "r",r ), sep='\t');
+	catn(c("Parameter", "outid", outid), sep='\t');
+	catn(c("Parameter", "max_restart", max_restart), sep='\t');
+	catn(c("Parameter", "sim_relatedness", sim_relatedness), sep='\t');
+	catn(c("Parameter", "sim_relatedness_power", sim_relatedness_power), sep='\t');
+	catn(c("Parameter", "sim_relatedness_delta", sim_relatedness_delta), sep='\t');
+	catn(c("Parameter", "sim_relatedness_g", sim_relatedness_g), sep='\t');
+	catn(c("Parameter", "npop", npop), sep='\t');
+	catn(c("Parameter", "sel_mig", sel_mig), sep='\t');
+	catn(c("Parameter", "selection", selection), sep='\t');
+	return;						
 }
 
 initialize()
@@ -24,7 +43,9 @@ initialize()
 
 	set_default('npop', 5); // number of subpopulations
 	set_default('sel_mig', 0.01); /// migration rate during the selective sweep
-	set_default("selection", ifelse(s != 0, "T", "F"));
+	set_default("selection", ifelse(s != 0, T, F));
+	
+	print_params();
 
 	initializeSLiMOptions(keepPedigrees=T);
 	initializeTreeSeq();
