@@ -1,32 +1,67 @@
-function (NULL) set_default(string k, lifs v) {
-	if(!exists(k)) defineConstant(k, v);
-	catn(c("Parameter", k, v), sep='\t');
-	return NULL;
+function (void)tryDefineConstant(string$ k, * v)
+{
+	if (!exists(k))
+		defineConstant(k, v);
+	return;
+}
+
+function (void)set_default_params(void)
+{
+	tryDefineConstant("L", 750000); // chromosome length in bp
+	tryDefineConstant("selpos", asInteger(L / 3)); // selection position in bp
+	tryDefineConstant("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
+	tryDefineConstant("N", 10000); // constant effective population size
+	tryDefineConstant("h", 0.5); // dominant coefficient
+	tryDefineConstant("s", 0.3); // selection coefficient
+	tryDefineConstant("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
+	tryDefineConstant("r", 6.67e-7); // recombinantion rate
+	tryDefineConstant("outid", 1); // idx
+	tryDefineConstant("max_restart", 100); // max number of restart
+	tryDefineConstant("sim_relatedness", F); // whether simulate high relatedness
+	tryDefineConstant("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
+	tryDefineConstant("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
+	tryDefineConstant("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
+	tryDefineConstant("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
+	tryDefineConstant("N0", 1000); // the effective population size at sampling time
+	tryDefineConstant("g_ne_change_start", 200); // Ne change time (generations ago -- BACKWARD)
+	tryDefineConstant("selection", ifelse(s != 0, T, F));
+	return;
+}
+
+function (void)print_params(void)
+{
+	d = Dictionary();
+	d.setValue("L", L);
+	d.setValue("selpos", selpos);
+	d.setValue("num_origins", num_origins);
+	d.setValue("N", N);
+	d.setValue("h", h);
+	d.setValue("s", s);
+	d.setValue("g_sel_start", g_sel_start);
+	d.setValue("outid", outid);
+	d.setValue("max_restart", max_restart);
+	d.setValue("r", r);
+	d.setValue("sim_relatedness", sim_relatedness);
+	d.setValue("sim_relatedness_power", sim_relatedness_power);
+	d.setValue("sim_relatedness_delta", sim_relatedness_delta);
+	d.setValue("sim_relatedness_g", sim_relatedness_g);
+	d.setValue("sim_relatedness_bypass", sim_relatedness_bypass);
+	d.setValue("N0", N0);
+	d.setValue("g_ne_change_start", g_ne_change_start);
+	d.setValue("selection", selection);
+	for (k in d.allKeys)
+	{
+		catn(c("PARAMETER", k, d.getValue(k)), sep='\t');
+	}
+	return;
 }
 
 initialize()
 {
-	set_default("L", 750000); // chromosome length in bp
-	set_default("selpos", asInteger(L / 3)); // selection position in bp
-	set_default("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
-	set_default("N", 10000); // ancient effective population size
-	set_default("h", 0.5);  // dominant coefficient
-	set_default("s", 0.3); // selection coefficient
-	set_default("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
-	set_default("r", 6.67e-7); // recombinantion rate
-	set_default("outid", 1); // idx
-	set_default("max_restart", 100); // max number of restart
-	set_default("sim_relatedness", F); // whether simulate high relatedness
-
-	set_default("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
-	set_default("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
-	set_default("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
-
-	set_default("N0", 1000); // the effective population size at sampling time
-	set_default("g_ne_change_start", 200); // Ne change time (generations ago -- BACKWARD)
-	set_default("slim_total_generations", // time of simulation ended -- forward
-		max(g_sel_start, g_ne_change_start + 1, sim_relatedness_g) );
-
+	set_default_params();
+	print_params();
+	
+	// initialization
 	initializeSLiMOptions(keepPedigrees=T);
 	initializeTreeSeq();
 	initializeMutationRate(0.0);
@@ -35,82 +70,113 @@ initialize()
 	initializeGenomicElementType("g1", m1, 1);
 	initializeGenomicElement(g1, 0, L - 1);
 	initializeRecombinationRate(r);
-
+	
+	// constant for internal use
+	defineConstant("slim_total_generations", max(g_sel_start, g_ne_change_start + 1, sim_relatedness_g)); // time of simulation ended -- forward
+	defineConstant("debug", F);
+	
 	// define global
-	defineGlobal("restart_counter", 1);
+	defineGlobal("restart_counter", 0);
 }
 
-
-s0 9999:10000 mateChoice()
+//// method1
+//s0 9999:10000 mateChoice()
+//{
+//	rel = individual.relatedness(sourceSubpop.individuals);
+//	return weights * (rel^sim_relatedness_power + sim_relatedness_delta);
+//}
+////
+// method2: time rescheduled (set default time range out of simulation window so is not used by default)
+s0 10000:100001 modifyChild()
 {
-	rel = individual.relatedness(sourceSubpop.individuals);
-	return weights * (rel^sim_relatedness_power + sim_relatedness_delta);
+	// migrant meets with non-migrant, always allow
+	if (parent1.migrant != parent2.migrant)
+		return T;
+	
+	// use this to let 50% of candicate pass without checking pedegree relatedness
+	// so the Ne etimates are more stable
+	if (child.index % sim_relatedness_bypass != 0)
+		return T;
+	prob = parent1.relatedness(parent2);
+	if (prob >= 1.0 / sim_relatedness_power)
+		return T;
+	else
+		return sample(c(T, F), size=1, replace=T, weights=c(sim_relatedness_delta, 1));
 }
 
-1 early()
+1:10000 early()
 {
-	sim.addSubpop("p1", N);
-	if (sim_relatedness ){
-		community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g  + 1);
-	}
-	community.rescheduleScriptBlock(s1, slim_total_generations - g_ne_change_start + 1);
-	community.rescheduleScriptBlock(s2, slim_total_generations - g_sel_start - 1, slim_total_generations); // minus 1 so that it allows the s2 code block the save the state
-	community.rescheduleScriptBlock(s3, slim_total_generations + 1, slim_total_generations + 1);
-	print(slim_total_generations);
-}
-
-// control populatio size
-s1 300: early()
-{
-	t = slim_total_generations - sim.cycle; // generation ago
-	Nt = (N / N0)^(t / g_ne_change_start) * N0; // calculate Nt
-	p1.setSubpopulationSize(asInteger(Nt)); // set new population size
-}
-
-// condition on selection establishment (not lost)
-s2 450: late()
-{
-	if (sim.cycle == slim_total_generations - g_sel_start - 1 & s != 0.0)
+	if (sim.cycle == 1)
 	{
-		sim.treeSeqOutput(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
-		print(c('saved state:', paste("tmp_slim_state_single_pop_", outid, ".trees", sep='')));
-		sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
-	}
-	else if (sim.cycle >= slim_total_generations - g_sel_start & s != 0)
-	{
-		mut = sim.mutationsOfType(m2);
-		fixed = sum(sim.substitutions.mutationType == m2);
-		need_restart = 0;
-		if (fixed)
+		// initialize pop size
+		sim.addSubpop("p1", N);
+		
+		// control time window for assortative mating
+		if (sim_relatedness)
 		{
-			print("selected mutation fixed");
-			catn(c("DAF", slim_total_generations - sim.cycle, 1.0), sep='\t');
-			community.deregisterScriptBlock(self);
+			community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g + 1);
 		}
-		else if ((mut.size() != 1) & restart_counter < max_restart)
+	}
+	g_ago = slim_total_generations - sim.cycle;
+	
+	// control populatio size
+	if (g_ago <= g_ne_change_start)
+	{
+		t = g_ago; // generation ago
+		Nt = (N / N0)^(t / g_ne_change_start) * N0; // calculate Nt
+		p1.setSubpopulationSize(asInteger(Nt)); // set new population size
+	}
+}
+
+1:10000 late()
+{
+	g_ago = slim_total_generations - sim.cycle;
+	if (selection)
+	{
+		// add selection 
+		if (g_ago == g_sel_start)
 		{
-			print("selected mutation lost; restarting...");
-			sim.readFromPopulationFile(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
-			setSeed(rdunif(1, 0, asInteger(2^62 - 1)));
+			// save state
+			sim.treeSeqOutput(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
+			print(c('saved state:', paste("tmp_slim_state_single_pop_", outid, ".trees", sep='')));
+			
+			// add mutations
 			sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
-			restart_counter = restart_counter + 1;
 		}
-		else
+		
+		// monitor and restart if needed
+		else if (g_ago < g_sel_start)
 		{
-			catn(c("DAF", slim_total_generations - sim.cycle, sim.mutationFrequencies(p1, mut)), sep='\t');
+			mut = sim.mutationsOfType(m2);
+			fixed = sum(sim.substitutions.mutationType == m2);
+			if (fixed)
+			{
+				catn(c("DAF", slim_total_generations - sim.cycle, 1.0), sep='\t');
+			}
+			else if ((mut.size() != 1) & restart_counter < max_restart)
+			{
+				print("selected mutation lost; restarting...");
+				sim.readFromPopulationFile(paste("tmp_slim_state_single_pop_", outid, ".trees", sep=''));
+				setSeed(rdunif(1, 0, asInteger(2^62 - 1)));
+				sample(p1.genomes, num_origins).addNewDrawnMutation(m2, selpos);
+				restart_counter = restart_counter + 1;
+			}
+			else
+			{
+				catn(c("DAF", slim_total_generations - sim.cycle, sim.mutationFrequencies(p1, mut)), sep='\t');
+			}
 		}
 	}
-}
-
-s3 500 late()
-{
-	sim.simulationFinished();
-	catn(c("restart_counter", restart_counter), sep='\t');
-	sim.treeSeqOutput(paste("tmp_slim_out_single_pop_", outid, ".trees", sep=''));
-}
-
-late()
-{
-	if (sim.cycle < slim_total_generations)
+	
+	// print trajectory of true popuation size
+	if (g_ago > 0)
+	{
 		catn(c('True_Ne', slim_total_generations - sim.cycle - 1, p1.individualCount), sep='\t');
+	}
+	if (g_ago == 0)
+	{
+		sim.simulationFinished();
+		catn(c("restart_counter", restart_counter), sep='\t');
+		sim.treeSeqOutput(paste("tmp_slim_out_single_pop_", outid, ".trees", sep=''));
+	}
 }
