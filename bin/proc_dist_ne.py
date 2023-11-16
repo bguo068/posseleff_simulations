@@ -13,6 +13,9 @@ pa.add_argument("--ibd_files", type=str, nargs=14, required=True)
 pa.add_argument("--vcf_files", type=str, nargs=14, required=True)
 pa.add_argument("--genome_set_id", type=str, required=True)
 pa.add_argument("--ibdne_jar", type=str, default=ibd_jar_default)
+pa.add_argument(
+    "--peak_validate_meth", type=str, choices=["xirs", "ihs"], default="xirs"
+)
 pa.add_argument("--ibdne_mincm", type=float, default=2)
 pa.add_argument("--ibdne_minregion", type=float, default=10)
 pa.add_argument("--ibdne_flatmeth", type=str, default="none")
@@ -81,7 +84,13 @@ ibd.filter_ibd_by_time(min_tmrca=1.5)
 ibd.filter_ibd_by_length(min_seg_cm=ibdne_mincm)
 
 # calculate XiR,s
-xirs_df = ibd.calc_xirs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
+if args.peak_validate_meth == "xirs":
+    ibd.calc_xirs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
+elif args.peak_validate_meth == "ihs":
+    ibd.calc_ihs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
+else:
+    raise NotImplementedError(f"{args.peak_validate_meth} is not valid method")
+
 
 if args.ibdne_no_diploid_conversion:
     print("skip diploid conversion")
@@ -100,7 +109,13 @@ ibd.calc_ibd_cov()
 ibd.find_peaks()
 
 
-ibd.filter_peaks_by_xirs(xirs_df)
+if args.peak_validate_meth == "xirs":
+    xirs_df = ibd._xirs_df
+    ibd.filter_peaks_by_xirs(xirs_df)
+elif args.peak_validate_meth == "ihs":
+    ibd.filter_peaks_by_ihs(min_ihs_hits=1, alpha=0.1)
+else:
+    raise NotImplementedError(f"{args.peak_validate_meth} is not valid method")
 
 ibd2 = ibd.duplicate(f"{label_str}_rmpeaks")
 ibd2.remove_peaks()

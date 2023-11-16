@@ -12,6 +12,7 @@ params.ibdne_mincm = 2
 params.ibdne_minregion = 10
 params.ibdne_flatmeth = 'none'
 params.min_ibdne_chr_min_afreq = 0.2
+params.peak_validate_meth = 'xirs' // 'xirs' or 'ihs'
 
 // default to false so it is consistent with previous version
 // can be set to true on the nextflow command line
@@ -513,6 +514,7 @@ process PROC_DIST_NE {
     def args_local = [
         ibd_files: "${ibd_lst}", // path is a blank separate list
         vcf_files: "${vcf_lst}", // path is a blank separate list
+        peak_validate_meth: params.peak_validate_meth,
         genome_set_id: genome_set_id,
         ibdne_mincm: params.ibdne_mincm,
         ibdne_minregion: params.ibdne_minregion,
@@ -566,6 +568,7 @@ process PROC_INFOMAP {
         ibd_files: "${ibd_lst}", // path is a blank separate list
         vcf_files: "${vcf_lst}", // path is a blank separate list
         genome_set_id: genome_set_id,
+        peak_validate_meth: params.peak_validate_meth,
     ].collect{k, v-> "--${k} ${v}"}.join(" ")
     """
     proc_infomap.py ${args_local}

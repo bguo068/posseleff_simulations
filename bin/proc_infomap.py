@@ -9,6 +9,9 @@ pa = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 pa.add_argument("--ibd_files", type=str, nargs="+", required=True)
 pa.add_argument("--vcf_files", type=str, nargs="+", required=True)
 pa.add_argument("--genome_set_id", type=int, required=True)
+pa.add_argument(
+    "--peak_validate_meth", type=str, choices=["xirs", "ihs"], default="xirs"
+)
 args = pa.parse_args()
 
 # use the number files to indicate the number of chromosome included
@@ -47,8 +50,14 @@ ibd.calc_ibd_cov()
 ibd.find_peaks()
 
 # calculate XiR,s and filter peaks
-xirs_df = ibd.calc_xirs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
-ibd.filter_peaks_by_xirs(xirs_df)
+if args.peak_validate_meth == "xirs":
+    xirs_df = ibd.calc_xirs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
+    ibd.filter_peaks_by_xirs(xirs_df)
+elif args.peak_validate_meth == "ihs":
+    ibd.calc_ihs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
+    ibd.filter_peaks_by_ihs(min_ihs_hits=1, alpha=0.1)
+else:
+    raise NotImplementedError(f"{args.peak_validate_meth} is not valid method")
 
 
 ibd2 = ibd.duplicate("rmpeak")
