@@ -92,9 +92,9 @@ else:
     raise NotImplementedError(f"{args.peak_validate_meth} is not valid method")
 
 
-if args.ibdne_no_diploid_conversion:
+if args.ibdne_no_diploid_conversion == "true":
     print("skip diploid conversion")
-else:
+elif args.ibdne_no_diploid_conversion == "false":
     # convert to heterzygous diploids
     # Note: remove_hbd might not remove a lot segments as
     # hdb only involves n/2 pairs of a total of n(n-1)/2 pairs (ratio: 1/(n-1)).
@@ -103,6 +103,10 @@ else:
 
     if args.ibdne_flatmeth != "none":
         ibd.flatten_diploid_ibd(method=args.ibdne_flatmeth)
+else:
+    raise NotImplementedError(
+        f"{args.ibdne_no_diploid_conversion} is not valid value is not a value value for option --ibdne_no_diploid_conversion"
+    )
 
 # calculate coverage and remove peaks
 ibd.calc_ibd_cov()
