@@ -1,4 +1,5 @@
 #! /usr/bin/env nextflow
+import groovy.json.JsonSlurper
 
 nextflow.enable.dsl = 2
 
@@ -13,7 +14,8 @@ params.ibdne_minregion = 10
 params.ibdne_flatmeth = 'none'
 params.min_ibdne_chr_min_afreq = 0.2
 params.peak_validate_meth = 'xirs' // 'xirs' or 'ihs'
-
+params.sp_sets_json = ""
+params.mp_sets_json = ""
 
 // default to false so it is consistent with previous version
 // can be set to true on the nextflow command line
@@ -75,6 +77,25 @@ def mp_sets = [
     mp_s02: mp_defaults + [s:0.2, genome_set_id: 20002],
     mp_s03: mp_defaults + [s:0.3, genome_set_id: 20003],
 ]
+
+// if json file is provide, use params from json files
+def genome_sets_from_json(default_, json_fn) {
+    assert json_fn != ""
+    def json_slurper = new JsonSlurper()
+    def f = file(json_fn)
+    def config = json_slurper.parse(f)
+    def res =  config.collectEntries {k,v -> [k, v + default_]}
+    return res
+}
+
+if (params.sp_sets_json != '') {
+    sp_sets = genome_sets_from_json(sp_defaults, params.sp_sets_json)
+}
+
+if (params.mp_sets_json != '') {
+    mp_sets = genome_sets_from_json(mp_defaults, params.mp_sets_json)
+}
+
 
 
 
