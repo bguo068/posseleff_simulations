@@ -55,7 +55,7 @@ if args.peak_validate_meth == "xirs":
     ibd.filter_peaks_by_xirs(xirs_df)
 elif args.peak_validate_meth == "ihs":
     ibd.calc_ihs(vcf_fn_lst=args.vcf_files, min_maf=0.01)
-    ibd.filter_peaks_by_ihs(min_ihs_hits=1, alpha=0.1)
+    ibd.filter_peaks_by_ihs(min_ihs_hits=1)
 else:
     raise NotImplementedError(f"{args.peak_validate_meth} is not valid method")
 
