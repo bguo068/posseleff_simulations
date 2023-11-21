@@ -84,7 +84,7 @@ def genome_sets_from_json(default_, json_fn) {
     def json_slurper = new JsonSlurper()
     def f = file(json_fn)
     def config = json_slurper.parse(f)
-    def res =  config.collectEntries {k,v -> [k, v + default_]}
+    def res =  config.collectEntries {k,v -> [k,  default_ + v ]}
     return res
 }
 
