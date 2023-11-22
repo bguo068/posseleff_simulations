@@ -79,18 +79,35 @@ initialize()
 	
 	// define global
 	defineGlobal("restart_counter", 0);
+	
+	// define global variable to keep track of the child.index pseudo parameter of the last modifyChild called.
+	// This is used to infer whether the modifyChild is called for the first time for a child.index at one generation.
+	defineGlobal("lastchildid", -1);
 }
 
 // for inbreeding (set default time range out of simulation window so is not used by default)
 s0 10000:10001 modifyChild()
 {
-	// migrant meet with no-migrant, always allow
-	if (parent1.migrant != parent2.migrant)
-		return T;
+	if (lastchildid != child.index)
+	{
+		// If it is first time called for this child index (at a generation),
+		// and if it is a migration mating, return T (accept). 
+		// NOTE: this is only checked for the first time entry of modifyChild for this child slot;
+		// In the subsequent enteies, the migrant status is ignored.
+		// This prevents the high probability of breeding with immigrant as
+		// reentry would accept all migration matings.
+		if (parent1.migrant | parent2.migrant)
+			return T;
+		
+		// update the global variable 
+		// Note: the lastchildid = 1 assignment won't update global variable. `defineGlobal` should be used instead.
+		defineGlobal("lastchildid", child.index);
+	}
 	
 	// use this to let 50% of candicate pass without checking pedegree relatedness
-	// so the Ne etimates are more stable
-	if (child.index % sim_relatedness_bypass != 0)
+	// so the Ne etimates are more stable.
+	// Adding sim.cycle is to avoid structure of due to child.index itself
+	if ((child.index + sim.cycle) % sim_relatedness_bypass != 0)
 		return T;
 	prob = parent1.relatedness(parent2);
 	if (prob >= 1.0 / sim_relatedness_power)
