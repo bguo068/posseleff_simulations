@@ -74,11 +74,9 @@ class SimParams(CheckableParams):
             "--sim_relatedness_power", type=float, default=d["sim_relatedness_power"]
         )
         p.add_argument(
-            "--sim_relatedness_delta", type=float,  default=d["sim_relatedness_delta"]
+            "--sim_relatedness_delta", type=float, default=d["sim_relatedness_delta"]
         )
-        p.add_argument(
-            "--sim_relatedness_g", type=int, default=d["sim_relatedness_g"]
-        )
+        p.add_argument("--sim_relatedness_g", type=int, default=d["sim_relatedness_g"])
         p.add_argument("--r", type=float, default=d["r"])
 
         p.add_argument("--mig", type=float, default=d["mig"])
@@ -133,6 +131,7 @@ class SlimMsprimeSimulatorForMultiplePop:
             max_restart=100,
             npop=self.params.npop,
             sel_mig=self.params.sel_mig,
+            mig=self.params.mig,
         )
 
         slim_params_str = " ".join([f"-d {k}={v}" for k, v in slim_params.items()])

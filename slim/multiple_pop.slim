@@ -24,6 +24,7 @@ function (void)set_default_params(void)
 	tryDefineConstant("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
 	tryDefineConstant('npop', 5); // number of subpopulations
 	tryDefineConstant('sel_mig', 0.01); /// migration rate during the selective sweep
+	tryDefineConstant('mig', 1e-5); /// migration rate during neutral time window 
 	tryDefineConstant("selection", ifelse(s != 0, T, F));
 	return;
 }
@@ -48,6 +49,7 @@ function (void)print_params(void)
 	d.setValue("sim_relatedness_bypass", sim_relatedness_bypass);
 	d.setValue("npop", npop);
 	d.setValue("sel_mig", sel_mig);
+	d.setValue("mig", mig);
 	d.setValue("selection", selection);
 	for (k in d.allKeys)
 	{
@@ -123,6 +125,12 @@ s0 10000:10001 modifyChild()
 	{
 		sim.addSubpop(paste("p", i, sep=""), N);
 	}
+	
+	// This is needed because with inbreeding simulation, we may have a time window
+	// when the simulation is netural and a migration should be specified.
+	// NOTE: subpopulation index from 0, but pop index is from 1
+	for (i in 2:npop)
+		sim.subpopulations[i - 1].setMigrationRates(i - 1, mig);
 	
 	// script rescheduling code to 1 early block
 	if (sim_relatedness)
