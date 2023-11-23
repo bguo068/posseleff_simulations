@@ -22,6 +22,7 @@ function (void)set_default_params(void)
 	tryDefineConstant("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
 	tryDefineConstant("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
 	tryDefineConstant("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
+	tryDefineConstant("sim_relatedness_bypass_complement", 0); // 0 true, 1, false
 	tryDefineConstant("sim_relatedness_promig", 0); // promote migration mating for inbreeding
 	tryDefineConstant('npop', 5); // number of subpopulations
 	tryDefineConstant('sel_mig', 0.01); /// migration rate during the selective sweep
@@ -48,6 +49,7 @@ function (void)print_params(void)
 	d.setValue("sim_relatedness_delta", sim_relatedness_delta);
 	d.setValue("sim_relatedness_g", sim_relatedness_g);
 	d.setValue("sim_relatedness_bypass", sim_relatedness_bypass);
+	d.setValue("sim_relatedness_bypass_complement", sim_relatedness_bypass_complement);
 	d.setValue("sim_relatedness_promig", sim_relatedness_promig);
 	d.setValue("npop", npop);
 	d.setValue("sel_mig", sel_mig);
@@ -85,6 +87,7 @@ initialize()
 	// define global variable to keep track of the child.index pseudo parameter of the last modifyChild called.
 	// This is used to infer whether the modifyChild is called for the first time for a child.index at one generation.
 	defineGlobal("lastchildid", -1);
+
 }
 
 s0 10000:10001 modifyChild()
@@ -108,8 +111,17 @@ s0 10000:10001 modifyChild()
 	// use this to let 50% of candicate pass without checking pedegree relatedness
 	// so the Ne etimates are more stable.
 	// Adding sim.cycle is to avoid structure of due to child.index itself
-	if ((child.index + sim.cycle) % sim_relatedness_bypass != 0)
+	
+	// For example, if sim_relatedness_bypass == 4:
+	// if sim_relatedness_bypass_complement == 0:  3/4 bypass; 1/4 go to assortative mating
+	// if sim_relatedness_bypass_complement == 1:  1/4 bypass; 3/4 go to assortative mating
+	mod = (child.index + sim.cycle) % sim_relatedness_bypass;
+	bypass1 = (mod != 0) & (sim_relatedness_bypass_complement==0);
+	bypass2 = (mod == 0) & (sim_relatedness_bypass_complement==1);
+	
+	if (bypass1 | bypass2)
 		return T;
+	
 	prob = parent1.relatedness(parent2);
 	if (prob >= 1.0 / sim_relatedness_power)
 		return T;
@@ -122,13 +134,22 @@ s1 10000:10001 modifyChild()
 {
 	// allow better migration into inbreeding simulation
 	if (parent1.migrant | parent2.migrant)
-			return T;
+		return T;
 	
 	// use this to let 50% of candicate pass without checking pedegree relatedness
 	// so the Ne etimates are more stable.
 	// Adding sim.cycle is to avoid structure of due to child.index itself
-	if ((child.index + sim.cycle) % sim_relatedness_bypass != 0)
+	
+	// For example, if sim_relatedness_bypass == 4:
+	// if sim_relatedness_bypass_complement == 0:  3/4 bypass; 1/4 go to assortative mating
+	// if sim_relatedness_bypass_complement == 1:  1/4 bypass; 3/4 go to assortative mating
+	mod = (child.index + sim.cycle) % sim_relatedness_bypass;
+	bypass1 = (mod != 0) & (sim_relatedness_bypass_complement==0);
+	bypass2 = (mod == 0) & (sim_relatedness_bypass_complement==1);
+	
+	if (bypass1 | bypass2)
 		return T;
+	
 	prob = parent1.relatedness(parent2);
 	if (prob >= 1.0 / sim_relatedness_power)
 		return T;
