@@ -17,6 +17,8 @@ function (void)set_default_params(void)
 	tryDefineConstant("r", 6.67e-7); // recombinantion rate
 	tryDefineConstant("outid", 1); // idx
 	tryDefineConstant("max_restart", 100); // max number of restart
+	tryDefineConstant("sim_selfing_rate", 0.0); // selfing rate
+	tryDefineConstant("sim_selfing_g", 40); // selfing starting time
 	tryDefineConstant("sim_relatedness", F); // whether simulate high relatedness
 	tryDefineConstant("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
 	tryDefineConstant("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
@@ -44,6 +46,8 @@ function (void)print_params(void)
 	d.setValue("outid", outid);
 	d.setValue("max_restart", max_restart);
 	d.setValue("r", r);
+	d.setValue("sim_selfing_rate", sim_selfing_rate);
+	d.setValue("sim_selfing_g", sim_selfing_g);
 	d.setValue("sim_relatedness", sim_relatedness);
 	d.setValue("sim_relatedness_power", sim_relatedness_power);
 	d.setValue("sim_relatedness_delta", sim_relatedness_delta);
@@ -78,7 +82,11 @@ initialize()
 	initializeRecombinationRate(r);
 	
 	// add 10 generations so that there is some pedigree information when inbreeding starts
-	defineConstant("slim_total_generations", max(sim_relatedness_g, g_sel_start) + 10);
+	x = g_sel_start + 1;
+	if(sim_relatedness) x = max(x, sim_relatedness_g + 10);
+	if(sim_selfing_rate > 0.0) x = max(x, sim_selfing_g + 1);
+	defineConstant("slim_total_generations", x);
+
 	defineConstant("debug", F);
 	
 	// define global
@@ -177,6 +185,16 @@ s1 10000:10001 modifyChild()
 //	}
 //}
 //
+
+// set selfing rate at a given time
+
+s3 10000 early () {
+	for (i in 1:npop) {
+		sim.subpopulations[i-1].setSelfingRate(sim_selfing_rate);
+	}
+}
+
+
 // create populations and set time range for s0 script block
 1 early()
 {
@@ -202,7 +220,13 @@ s1 10000:10001 modifyChild()
 			community.rescheduleScriptBlock(s1, slim_total_generations - sim_relatedness_g + 1);
 		}
 	}
+	if (sim_selfing_rate > 0) {
+		assert(slim_total_generations >= sim_selfing_g);
+		community.rescheduleScriptBlock(s3, slim_total_generations - sim_selfing_g + 1, slim_total_generations - sim_selfing_g + 1);
+	}
 }
+
+
 
 function (void)restart_with_selection(void)
 {

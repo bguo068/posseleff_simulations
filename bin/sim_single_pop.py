@@ -31,6 +31,8 @@ class SimParams(CheckableParams):
         self.s = 0.3
         self.g_sel_start = 80
         self.r = 0.01 / 15_000
+        self.sim_selfing_rate = 0.0
+        self.sim_selfing_g = 40
         self.sim_relatedness = 0
         self.sim_relatedness_power = 1.0
         self.sim_relatedness_delta = 0.01
@@ -59,6 +61,8 @@ class SimParams(CheckableParams):
         p.add_argument("--h", type=float, default=d["h"])
         p.add_argument("--g_sel_start", type=int, default=d["g_sel_start"])
         p.add_argument("--r", type=float, default=d["r"])
+        p.add_argument("--sim_selfing_rate", type=float, default=d["sim_selfing_rate"])
+        p.add_argument("--sim_selfing_g", type=int, default=d["sim_selfing_g"])
         p.add_argument(
             "--sim_relatedness", type=int, choices=[0, 1], default=d["sim_relatedness"]
         )
@@ -66,11 +70,9 @@ class SimParams(CheckableParams):
             "--sim_relatedness_power", type=float, default=d["sim_relatedness_power"]
         )
         p.add_argument(
-            "--sim_relatedness_delta", type=float,  default=d["sim_relatedness_delta"]
+            "--sim_relatedness_delta", type=float, default=d["sim_relatedness_delta"]
         )
-        p.add_argument(
-            "--sim_relatedness_g", type=int, default=d["sim_relatedness_g"]
-        )
+        p.add_argument("--sim_relatedness_g", type=int, default=d["sim_relatedness_g"])
         p.add_argument("--g_ne_change_start", type=int, default=d["g_ne_change_start"])
         p.add_argument("--N0", type=int, default=d["N0"])
         p.add_argument("--u", type=float, default=d["u"])
@@ -131,6 +133,8 @@ class SlimMsprimeSimulatorForSinglePop:
             "r": self.params.r,
             "outid": outid,
             "max_restart": 100,
+            "sim_selfing_rate": self.params.sim_selfing_rate,
+            "sim_selfing_g": self.params.sim_selfing_g,
             "sim_relatedness": self.params.sim_relatedness,
             "sim_relatedness_power": self.params.sim_relatedness_power,
             "sim_relatedness_delta": self.params.sim_relatedness_delta,
@@ -183,7 +187,6 @@ class SlimMsprimeSimulatorForSinglePop:
         slim_seed=None,
         recapitate_seed=None,
     ):
-
         self._run_slim(idx, slim_seed=slim_seed)
         self._parse_slim_stdout()
 

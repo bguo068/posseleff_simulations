@@ -37,6 +37,8 @@ class SimParams(CheckableParams):
         self.s = 0.3
         self.g_sel_start = 80
         self.r = 0.01 / 15_000
+        self.sim_selfing_rate = 0.0
+        self.sim_selfing_g = 40
         self.sim_relatedness = 0
         self.sim_relatedness_power = 1.0
         self.sim_relatedness_delta = 0.01
@@ -70,6 +72,8 @@ class SimParams(CheckableParams):
         p.add_argument("--s", type=float, default=d["s"])
         p.add_argument("--N", type=int, default=d["N"])
         p.add_argument("--g_sel_start", type=int, default=d["g_sel_start"])
+        p.add_argument("--sim_selfing_rate", type=float, default=d["sim_selfing_rate"])
+        p.add_argument("--sim_selfing_g", type=int, default=d["sim_selfing_g"])
         p.add_argument(
             "--sim_relatedness", choices=[0, 1], type=int, default=d["sim_relatedness"]
         )
@@ -131,6 +135,8 @@ class SlimMsprimeSimulatorForMultiplePop:
         slim_params = dict(
             L=self.params.seqlen,
             selpos=self.params.selpos,
+            sim_selfing_rate=self.params.sim_selfing_rate,
+            sim_selfing_g=self.params.sim_selfing_g,
             sim_relatedness=self.params.sim_relatedness,
             sim_relatedness_power=self.params.sim_relatedness_power,
             sim_relatedness_delta=self.params.sim_relatedness_delta,

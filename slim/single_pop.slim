@@ -17,6 +17,8 @@ function (void)set_default_params(void)
 	tryDefineConstant("r", 6.67e-7); // recombinantion rate
 	tryDefineConstant("outid", 1); // idx
 	tryDefineConstant("max_restart", 100); // max number of restart
+	tryDefineConstant("sim_selfing_rate", 0.0); // selfing rate
+	tryDefineConstant("sim_selfing_g", 40); // selfing starting time
 	tryDefineConstant("sim_relatedness", F); // whether simulate high relatedness
 	tryDefineConstant("sim_relatedness_power", 0.0); // parameter1 for mapping relatedness to probability
 	tryDefineConstant("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
@@ -41,6 +43,8 @@ function (void)print_params(void)
 	d.setValue("outid", outid);
 	d.setValue("max_restart", max_restart);
 	d.setValue("r", r);
+	d.setValue("sim_selfing_rate", sim_selfing_rate);
+	d.setValue("sim_selfing_g", sim_selfing_g);
 	d.setValue("sim_relatedness", sim_relatedness);
 	d.setValue("sim_relatedness_power", sim_relatedness_power);
 	d.setValue("sim_relatedness_delta", sim_relatedness_delta);
@@ -72,7 +76,11 @@ initialize()
 	initializeRecombinationRate(r);
 	
 	// constant for internal use
-	defineConstant("slim_total_generations", max(g_sel_start, g_ne_change_start + 1, sim_relatedness_g)); // time of simulation ended -- forward
+	x = max(g_ne_change_start, g_sel_start+1);
+	if(sim_relatedness) x = max(x, sim_relatedness_g + 10);
+	if(sim_selfing_rate > 0.0) x = max(x, sim_selfing_g + 1);
+	defineConstant("slim_total_generations", x);
+
 	defineConstant("debug", F);
 	
 	// define global
@@ -104,6 +112,11 @@ s0 10000:100001 modifyChild()
 		return sample(c(T, F), size=1, replace=T, weights=c(sim_relatedness_delta, 1));
 }
 
+s3 10000 early () {
+	p1.setSelfingRate(sim_selfing_rate);
+}
+
+
 1:10000 early()
 {
 	if (sim.cycle == 1)
@@ -115,6 +128,11 @@ s0 10000:100001 modifyChild()
 		if (sim_relatedness)
 		{
 			community.rescheduleScriptBlock(s0, slim_total_generations - sim_relatedness_g + 1);
+		}
+		
+		if (sim_selfing_rate > 0) {
+			assert(slim_total_generations >= sim_selfing_g);
+			community.rescheduleScriptBlock(s3, slim_total_generations - sim_selfing_g + 1, slim_total_generations - sim_relatedness_g + 1);
 		}
 	}
 	g_ago = slim_total_generations - sim.cycle;
