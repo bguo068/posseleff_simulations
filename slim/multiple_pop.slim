@@ -10,10 +10,12 @@ function (void)set_default_params(void)
 	tryDefineConstant("L", 750000); // chromosome length in bp
 	tryDefineConstant("selpos", asInteger(L / 3)); // selection position in bp
 	tryDefineConstant("num_origins", 1); //how many genomes contains the selected mutation when selection starts.
-	tryDefineConstant("N", 10000); // constant effective population size
+	tryDefineConstant("N", 10000); // constant effective population size (ancestral)
+	tryDefineConstant("N0", N); // constant effective population size (present day)
+	tryDefineConstant("g_ne_change_start", 200); // Ne change time (generations ago -- BACKWARD)
 	tryDefineConstant("h", 0.5); // dominant coefficient
 	tryDefineConstant("s", 0.3); // selection coefficient
-	tryDefineConstant("g_sel_start", 80); // time of selected mutation being introduced (generations ago --BACKWARD)
+	tryDefineConstant("g_sel_start", 81); // time of selected mutation being introduced (generations ago --BACKWARD)
 	tryDefineConstant("r", 6.67e-7); // recombinantion rate
 	tryDefineConstant("outid", 1); // idx
 	tryDefineConstant("max_restart", 100); // max number of restart
@@ -40,6 +42,8 @@ function (void)print_params(void)
 	d.setValue("selpos", selpos);
 	d.setValue("num_origins", num_origins);
 	d.setValue("N", N);
+	d.setValue("N0", N0);
+	d.setValue("g_ne_change_start", g_ne_change_start);
 	d.setValue("h", h);
 	d.setValue("s", s);
 	d.setValue("g_sel_start", g_sel_start);
@@ -82,7 +86,9 @@ initialize()
 	initializeRecombinationRate(r);
 	
 	// add 10 generations so that there is some pedigree information when inbreeding starts
+	
 	x = g_sel_start + 1;
+	if(N0 != N) x = max(x, g_ne_change_start + 1);
 	if(sim_relatedness) x = max(x, sim_relatedness_g + 10);
 	if(sim_selfing_rate > 0.0) x = max(x, sim_selfing_g + 1);
 	defineConstant("slim_total_generations", x);
@@ -194,6 +200,16 @@ s3 10000 early () {
 	}
 }
 
+// Change population size
+
+s4 10000 early() {
+	t = slim_total_generations - sim.cycle; // generation ago
+ 	Nt = asInteger((N / N0)^(t / g_ne_change_start) * N0); // calculate Nt
+	for (i in 1:npop) {
+		sim.subpopulations[i-1].setSubpopulationSize(Nt);
+	}
+}
+
 
 // create populations and set time range for s0 script block
 1 early()
@@ -223,6 +239,9 @@ s3 10000 early () {
 	if (sim_selfing_rate > 0) {
 		assert(slim_total_generations >= sim_selfing_g);
 		community.rescheduleScriptBlock(s3, slim_total_generations - sim_selfing_g + 1, slim_total_generations - sim_selfing_g + 1);
+	}
+	if (N0 != N) {
+		community.rescheduleScriptBlock(s4, slim_total_generations - g_ne_change_start + 1);
 	}
 }
 
