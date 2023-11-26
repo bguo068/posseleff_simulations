@@ -46,6 +46,8 @@ class SimParams(CheckableParams):
         self.sim_relatedness_bypass = 2
         self.sim_relatedness_bypass_complement = 0
         self.sim_relatedness_promig = 0
+        self.mig_mate_prefer = 1.0
+        self.mig_mate_prefer_g = 200
         #
         self.g_ne_change_start = 200
         self.N0 = self.N
@@ -97,6 +99,8 @@ class SimParams(CheckableParams):
             type=int,
             default=d["sim_relatedness_bypass_complement"],
         )
+        p.add_argument("--mig_mate_prefer", type=float, default=d["mig_mate_prefer"])
+        p.add_argument("--mig_mate_prefer_g", type=int, default=d["mig_mate_prefer_g"])
         p.add_argument("--r", type=float, default=d["r"])
 
         p.add_argument("--N0", type=int, default=d["N0"])
@@ -148,6 +152,8 @@ class SlimMsprimeSimulatorForMultiplePop:
             sim_relatedness_promig=self.params.sim_relatedness_promig,
             sim_relatedness_bypass=self.params.sim_relatedness_bypass,
             sim_relatedness_bypass_complement=self.params.sim_relatedness_bypass_complement,
+            mig_mate_prefer=self.params.mig_mate_prefer,
+            mig_mate_prefer_g=self.params.mig_mate_prefer_g,
             num_origins=self.params.num_origins,
             N=self.params.N,
             N0=self.params.N0,
