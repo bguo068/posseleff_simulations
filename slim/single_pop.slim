@@ -24,6 +24,7 @@ function (void)set_default_params(void)
 	tryDefineConstant("sim_relatedness_delta", 0.01); // parameter2 for mapping relatedness to probability
 	tryDefineConstant("sim_relatedness_g", 40); // generations ago to start simulate inbreeding via mating to relatives
 	tryDefineConstant("sim_relatedness_bypass", 2); // bypass 1/x child for checking parents' relatedness
+	tryDefineConstant("sim_relatedness_bypass_complement", 0); // 0 false, 1, true 
 	tryDefineConstant("N0", 1000); // the effective population size at sampling time
 	tryDefineConstant("g_ne_change_start", 200); // Ne change time (generations ago -- BACKWARD)
 	tryDefineConstant("selection", ifelse(s != 0, T, F));
@@ -50,6 +51,7 @@ function (void)print_params(void)
 	d.setValue("sim_relatedness_delta", sim_relatedness_delta);
 	d.setValue("sim_relatedness_g", sim_relatedness_g);
 	d.setValue("sim_relatedness_bypass", sim_relatedness_bypass);
+	d.setValue("sim_relatedness_bypass_complement", sim_relatedness_bypass_complement);
 	d.setValue("N0", N0);
 	d.setValue("g_ne_change_start", g_ne_change_start);
 	d.setValue("selection", selection);
@@ -97,14 +99,24 @@ initialize()
 // method2: time rescheduled (set default time range out of simulation window so is not used by default)
 s0 10000:100001 modifyChild()
 {
-	// migrant meets with non-migrant, always allow
-	if (parent1.migrant != parent2.migrant)
+	// allow better migration into inbreeding simulation
+	if (parent1.migrant | parent2.migrant)
 		return T;
 	
 	// use this to let 50% of candicate pass without checking pedegree relatedness
-	// so the Ne etimates are more stable
-	if (child.index % sim_relatedness_bypass != 0)
+	// so the Ne etimates are more stable.
+	// Adding sim.cycle is to avoid structure of due to child.index itself
+	
+	// For example, if sim_relatedness_bypass == 4:
+	// if sim_relatedness_bypass_complement == 0:  3/4 bypass; 1/4 go to assortative mating
+	// if sim_relatedness_bypass_complement == 1:  1/4 bypass; 3/4 go to assortative mating
+	mod = (child.index + sim.cycle) % sim_relatedness_bypass;
+	bypass1 = (mod != 0) & (sim_relatedness_bypass_complement==0);
+	bypass2 = (mod == 0) & (sim_relatedness_bypass_complement==1);
+	
+	if (bypass1 | bypass2)
 		return T;
+	
 	prob = parent1.relatedness(parent2);
 	if (prob >= 1.0 / sim_relatedness_power)
 		return T;

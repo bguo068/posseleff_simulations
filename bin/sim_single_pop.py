@@ -37,6 +37,8 @@ class SimParams(CheckableParams):
         self.sim_relatedness_power = 1.0
         self.sim_relatedness_delta = 0.01
         self.sim_relatedness_g = 40
+        self.sim_relatedness_bypass = 2
+        self.sim_relatedness_bypass_complement = 0
         #
         self.g_ne_change_start = 200
         self.N0 = 1000
@@ -73,6 +75,14 @@ class SimParams(CheckableParams):
             "--sim_relatedness_delta", type=float, default=d["sim_relatedness_delta"]
         )
         p.add_argument("--sim_relatedness_g", type=int, default=d["sim_relatedness_g"])
+        p.add_argument(
+            "--sim_relatedness_bypass", type=int, default=d["sim_relatedness_bypass"]
+        )
+        p.add_argument(
+            "--sim_relatedness_bypass_complement",
+            type=int,
+            default=d["sim_relatedness_bypass_complement"],
+        )
         p.add_argument("--g_ne_change_start", type=int, default=d["g_ne_change_start"])
         p.add_argument("--N0", type=int, default=d["N0"])
         p.add_argument("--u", type=float, default=d["u"])
@@ -139,6 +149,8 @@ class SlimMsprimeSimulatorForSinglePop:
             "sim_relatedness_power": self.params.sim_relatedness_power,
             "sim_relatedness_delta": self.params.sim_relatedness_delta,
             "sim_relatedness_g": self.params.sim_relatedness_g,
+            "sim_relatedness_bypass": self.params.sim_relatedness_bypass,
+            "sim_relatedness_bypass_complement": self.params.sim_relatedness_bypass_complement,
             "N0": self.params.N0,
             "g_ne_change_start": self.params.g_ne_change_start,
         }
