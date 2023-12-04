@@ -13,13 +13,13 @@ params.ibdne_mincm = 2
 params.ibdne_minregion = 10
 params.ibdne_flatmeth = 'none'
 params.min_ibdne_chr_min_afreq = 0.2
-params.peak_validate_meth = 'xirs' // 'xirs' or 'ihs'
+params.peak_validate_meth = 'ihs' // 'xirs' or 'ihs'
 params.sp_sets_json = ""
 params.mp_sets_json = ""
 
 // default to false so it is consistent with previous version
 // can be set to true on the nextflow command line
-params.ibdne_no_diploid_convertion = false
+params.ibdne_no_diploid_convertion = "true"
 params.sim_multi_chrom_genome = false
 
 def resdir = params.resdir
