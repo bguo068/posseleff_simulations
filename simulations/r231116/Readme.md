@@ -1,23 +1,23 @@
 # Goal
 
-Try to rerun simulation similar to r230420 but with ihs for peak validation
+Try to rerun simulation similar to r230420 but with 
+(1) ihs for peak validation
+(2) no ibdne diploid conversion
+(3) only remove high impact peaks for ibdne analysis to mitigate chromosome
+fragmentation due to noise low-impact peaks.
 
-# Change 
+# Simulation parameters
 
-To keep the mp_sets and sp_sets consistent with those in r230420 as
-they were changed since r230420, (commit: `334008cd55c9d40c76fbea0318c4991e0e8d1fe1`)
+Please check `main.nf`. The variable `sp_sets` contains all parameters used for
+single-population model, and `mp_sets` for parameters used for
+multiple-population model.
 
 # Command
 
 ```
-nextflow ../../main.nf \
+nextflow /local/chib/toconnor_grp/bing/posseleff_simulations/main.nf \
     -profile sge \
     --num_reps 30 \
     --peak_validate_meth ihs \
     --ibdne_no_diploid_convertion true
 ```
-
-# versions:
-
-ibdutils @ 9ceffdccb8e856b256cf91ba21525c61328ce57b
-posseleff_simulations @ db9a30bcb8ff65955eb4ebbe820a6d272523d2a9
