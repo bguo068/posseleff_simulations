@@ -27,7 +27,12 @@ customization, making it a versatile tool for many IBD-related analyses.
             1.	selection coefficient
             2.	number of origins of the favored mutation
             3.	selection starting time (generations)
-    - High-relatedness simulation (0: off, 1: on)
+    - High-relatedness/inbreeding simulations
+        - support inbreeding modeling via three strategies:
+            * shrinking population size
+            * positive assortative mating
+            * selfing
+        - see `simulations/Readme.md` for examples.
 - Call true IBD segment from tree sequence
 - IBD processing and selection correction
     - IBD processing for generating input files for IBDNe (Ne estimation)
@@ -70,6 +75,9 @@ to fit your cluster system. If run on a local computer, please remove the
     - More simulation parameters can be found in the definition of
      `sp_defaults`,`mp_defaults`, `sp_sets` and `mp_sets` dictionaries within
      the `main.nf` file
+    - For more complicated or large scale simulations, the `--sp_sets_json`,
+    `--mp_sets_json` arguments and `-entry` option are recommended.  see
+    `simulations/Readme.md` for examples.
 
 ## Input, Test Data and Output
 
@@ -94,11 +102,14 @@ https://doi.org/10.1101/2023.07.14.549114
 
 Other citations:
 
-- `Xir,s` statistics: 
-> Henden, L., Lee, S., Mueller, I., Barry, A., & Bahlo, M. (2018).
-Identity-by-descent analyses for measuring population dynamics and selection in
-recombining pathogens. PLoS genetics, 14(5), e1007279.
-https://doi.org/10.1371/journal.pgen.1007279
+- `iHS` statistics and calculation:
+
+iHS calculation via scikit-allel: 
+> Miles, A. et al. cggh/scikit-allel: v1.3.7. (2023) doi:10.5281/ZENODO.8326460. 
+
+iHS statistics:
+> Voight, B. F., Kudaravalli, S., Wen, X. & Pritchard, J. K. A map of recent
+positive selection in the human genome. PLoS Biol. 4, e72 (2006).
 
 - `IBDNe`
 > Browning, S. R., & Browning, B. L. (2015). Accurate Non-parametric Estimation
@@ -117,7 +128,3 @@ https://doi.org/10.1073/pnas.0706851105
 `tskibd`: https://github.com/bguo068/tskibd
 
 
-## Inbreeding
-
-Branch 1: `inbreeding` focusing on modifying  simulation structure for multiple chromosome genome simulation for (Single-population model)
-branch 2: `inbreeding2` focusing on fine-tunning parameters for allow established selection
