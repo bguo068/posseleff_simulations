@@ -1,0 +1,338 @@
+{
+    "mp_s0.0_ssr0.0": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 0,
+        "s": 0.0,
+        "sim_selfing_rate": 0.0
+    },
+    "mp_s0.0_n01000_ssr0.0": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.0
+    },
+    "mp_s0.3_ssr0.0": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.0
+    },
+    "mp_s0.3_n01000_ssr0.0": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.0
+    },
+    "mp_s0.0_ssr0.1": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 1000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.1
+    },
+    "mp_s0.0_n01000_ssr0.1": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 1000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.1
+    },
+    "mp_s0.3_ssr0.1": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 1100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.1
+    },
+    "mp_s0.3_n01000_ssr0.1": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 1100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.1
+    },
+    "mp_s0.0_ssr0.2": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 2000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.2
+    },
+    "mp_s0.0_n01000_ssr0.2": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 2000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.2
+    },
+    "mp_s0.3_ssr0.2": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 2100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.2
+    },
+    "mp_s0.3_n01000_ssr0.2": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 2100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.2
+    },
+    "mp_s0.0_ssr0.3": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 3000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.3
+    },
+    "mp_s0.0_n01000_ssr0.3": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 3000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.3
+    },
+    "mp_s0.3_ssr0.3": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 3100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.3
+    },
+    "mp_s0.3_n01000_ssr0.3": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 3100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.3
+    },
+    "mp_s0.0_ssr0.5": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 4000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.5
+    },
+    "mp_s0.0_n01000_ssr0.5": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 4000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.5
+    },
+    "mp_s0.3_ssr0.5": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 4100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.5
+    },
+    "mp_s0.3_n01000_ssr0.5": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 4100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.5
+    },
+    "mp_s0.0_ssr0.7": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 5000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.7
+    },
+    "mp_s0.0_n01000_ssr0.7": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 5000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.7
+    },
+    "mp_s0.3_ssr0.7": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 5100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.7
+    },
+    "mp_s0.3_n01000_ssr0.7": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 5100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.7
+    },
+    "mp_s0.0_ssr0.8": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 6000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.8
+    },
+    "mp_s0.0_n01000_ssr0.8": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 6000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.8
+    },
+    "mp_s0.3_ssr0.8": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 6100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.8
+    },
+    "mp_s0.3_n01000_ssr0.8": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 6100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.8
+    },
+    "mp_s0.0_ssr0.9": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 7000000,
+        "s": 0.0,
+        "sim_selfing_rate": 0.9
+    },
+    "mp_s0.0_n01000_ssr0.9": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 7000100,
+        "s": 0.0,
+        "N0": 1000,
+        "sim_selfing_rate": 0.9
+    },
+    "mp_s0.3_ssr0.9": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 7100000,
+        "s": 0.3,
+        "sim_selfing_rate": 0.9
+    },
+    "mp_s0.3_n01000_ssr0.9": {
+        "N": 10000,
+        "g_sel_start": 80,
+        "sel_mig": 0.01,
+        "g_ne_change_start": 200,
+        "sim_selfing_g": 200,
+        "genome_set_id": 7100100,
+        "s": 0.3,
+        "N0": 1000,
+        "sim_selfing_rate": 0.9
+    }
+}
