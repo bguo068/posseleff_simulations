@@ -1,0 +1,854 @@
+{
+    "mp_smig0.01_s00_gss80": {
+        "N": 10000,
+        "genome_set_id": 10000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80
+    },
+    "mp_smig0.01_s00_gss80_n03000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 20000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.01_s00_gss80_n03000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 30000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.01_s00_gss80_n03000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 40000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.01_s00_gss80_n03000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 50000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.01_s00_gss80_n03000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 60000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.01_s00_gss80_n01000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 70000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.01_s00_gss80_n01000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 80000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.01_s00_gss80_n01000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 90000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.01_s00_gss80_n01000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 100000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.01_s00_gss80_n01000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 110000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.01_s00_gss80_n0300_ssg10": {
+        "N": 10000,
+        "genome_set_id": 120000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.01_s00_gss80_n0300_ssg25": {
+        "N": 10000,
+        "genome_set_id": 130000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.01_s00_gss80_n0300_ssg50": {
+        "N": 10000,
+        "genome_set_id": 140000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.01_s00_gss80_n0300_ssg100": {
+        "N": 10000,
+        "genome_set_id": 150000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.01_s00_gss80_n0300_ssg200": {
+        "N": 10000,
+        "genome_set_id": 160000,
+        "sel_mig": 0.01,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.01_s03_gss80": {
+        "N": 10000,
+        "genome_set_id": 170000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80
+    },
+    "mp_smig0.01_s03_gss80_n03000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 180000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.01_s03_gss80_n03000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 190000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.01_s03_gss80_n03000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 200000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.01_s03_gss80_n03000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 210000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.01_s03_gss80_n03000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 220000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.01_s03_gss80_n01000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 230000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.01_s03_gss80_n01000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 240000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.01_s03_gss80_n01000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 250000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.01_s03_gss80_n01000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 260000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.01_s03_gss80_n01000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 270000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.01_s03_gss80_n0300_ssg10": {
+        "N": 10000,
+        "genome_set_id": 280000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.01_s03_gss80_n0300_ssg25": {
+        "N": 10000,
+        "genome_set_id": 290000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.01_s03_gss80_n0300_ssg50": {
+        "N": 10000,
+        "genome_set_id": 300000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.01_s03_gss80_n0300_ssg100": {
+        "N": 10000,
+        "genome_set_id": 310000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.01_s03_gss80_n0300_ssg200": {
+        "N": 10000,
+        "genome_set_id": 320000,
+        "sel_mig": 0.01,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.015_s00_gss80": {
+        "N": 10000,
+        "genome_set_id": 330000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80
+    },
+    "mp_smig0.015_s00_gss80_n03000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 340000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.015_s00_gss80_n03000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 350000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.015_s00_gss80_n03000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 360000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.015_s00_gss80_n03000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 370000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.015_s00_gss80_n03000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 380000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.015_s00_gss80_n01000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 390000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.015_s00_gss80_n01000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 400000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.015_s00_gss80_n01000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 410000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.015_s00_gss80_n01000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 420000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.015_s00_gss80_n01000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 430000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.015_s00_gss80_n0300_ssg10": {
+        "N": 10000,
+        "genome_set_id": 440000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.015_s00_gss80_n0300_ssg25": {
+        "N": 10000,
+        "genome_set_id": 450000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.015_s00_gss80_n0300_ssg50": {
+        "N": 10000,
+        "genome_set_id": 460000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.015_s00_gss80_n0300_ssg100": {
+        "N": 10000,
+        "genome_set_id": 470000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.015_s00_gss80_n0300_ssg200": {
+        "N": 10000,
+        "genome_set_id": 480000,
+        "sel_mig": 0.015,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.015_s03_gss80": {
+        "N": 10000,
+        "genome_set_id": 490000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80
+    },
+    "mp_smig0.015_s03_gss80_n03000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 500000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.015_s03_gss80_n03000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 510000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.015_s03_gss80_n03000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 520000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.015_s03_gss80_n03000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 530000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.015_s03_gss80_n03000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 540000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.015_s03_gss80_n01000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 550000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.015_s03_gss80_n01000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 560000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.015_s03_gss80_n01000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 570000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.015_s03_gss80_n01000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 580000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.015_s03_gss80_n01000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 590000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.015_s03_gss80_n0300_ssg10": {
+        "N": 10000,
+        "genome_set_id": 600000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.015_s03_gss80_n0300_ssg25": {
+        "N": 10000,
+        "genome_set_id": 610000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.015_s03_gss80_n0300_ssg50": {
+        "N": 10000,
+        "genome_set_id": 620000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.015_s03_gss80_n0300_ssg100": {
+        "N": 10000,
+        "genome_set_id": 630000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.015_s03_gss80_n0300_ssg200": {
+        "N": 10000,
+        "genome_set_id": 640000,
+        "sel_mig": 0.015,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.03_s00_gss80": {
+        "N": 10000,
+        "genome_set_id": 650000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80
+    },
+    "mp_smig0.03_s00_gss80_n03000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 660000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.03_s00_gss80_n03000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 670000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.03_s00_gss80_n03000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 680000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.03_s00_gss80_n03000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 690000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.03_s00_gss80_n03000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 700000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.03_s00_gss80_n01000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 710000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.03_s00_gss80_n01000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 720000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.03_s00_gss80_n01000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 730000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.03_s00_gss80_n01000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 740000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.03_s00_gss80_n01000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 750000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.03_s00_gss80_n0300_ssg10": {
+        "N": 10000,
+        "genome_set_id": 760000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.03_s00_gss80_n0300_ssg25": {
+        "N": 10000,
+        "genome_set_id": 770000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.03_s00_gss80_n0300_ssg50": {
+        "N": 10000,
+        "genome_set_id": 780000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.03_s00_gss80_n0300_ssg100": {
+        "N": 10000,
+        "genome_set_id": 790000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.03_s00_gss80_n0300_ssg200": {
+        "N": 10000,
+        "genome_set_id": 800000,
+        "sel_mig": 0.03,
+        "s": 0.0,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.03_s03_gss80": {
+        "N": 10000,
+        "genome_set_id": 810000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80
+    },
+    "mp_smig0.03_s03_gss80_n03000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 820000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.03_s03_gss80_n03000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 830000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.03_s03_gss80_n03000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 840000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.03_s03_gss80_n03000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 850000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.03_s03_gss80_n03000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 860000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 3000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.03_s03_gss80_n01000_ssg10": {
+        "N": 10000,
+        "genome_set_id": 870000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.03_s03_gss80_n01000_ssg25": {
+        "N": 10000,
+        "genome_set_id": 880000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.03_s03_gss80_n01000_ssg50": {
+        "N": 10000,
+        "genome_set_id": 890000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.03_s03_gss80_n01000_ssg100": {
+        "N": 10000,
+        "genome_set_id": 900000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.03_s03_gss80_n01000_ssg200": {
+        "N": 10000,
+        "genome_set_id": 910000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 1000,
+        "g_ne_change_start": 200
+    },
+    "mp_smig0.03_s03_gss80_n0300_ssg10": {
+        "N": 10000,
+        "genome_set_id": 920000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 10
+    },
+    "mp_smig0.03_s03_gss80_n0300_ssg25": {
+        "N": 10000,
+        "genome_set_id": 930000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 25
+    },
+    "mp_smig0.03_s03_gss80_n0300_ssg50": {
+        "N": 10000,
+        "genome_set_id": 940000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 50
+    },
+    "mp_smig0.03_s03_gss80_n0300_ssg100": {
+        "N": 10000,
+        "genome_set_id": 950000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 100
+    },
+    "mp_smig0.03_s03_gss80_n0300_ssg200": {
+        "N": 10000,
+        "genome_set_id": 960000,
+        "sel_mig": 0.03,
+        "s": 0.3,
+        "g_sel_start": 80,
+        "N0": 300,
+        "g_ne_change_start": 200
+    }
+}
