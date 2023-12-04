@@ -1,0 +1,74 @@
+{
+    "sp_s0.0_ssr0.0": {
+        "s": 0.0,
+        "sim_selfing_rate": 0.0,
+        "genome_set_id": 100,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.0_ssr0.1": {
+        "s": 0.0,
+        "sim_selfing_rate": 0.1,
+        "genome_set_id": 200,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.0_ssr0.2": {
+        "s": 0.0,
+        "sim_selfing_rate": 0.2,
+        "genome_set_id": 300,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.0_ssr0.3": {
+        "s": 0.0,
+        "sim_selfing_rate": 0.3,
+        "genome_set_id": 400,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.0_ssr0.5": {
+        "s": 0.0,
+        "sim_selfing_rate": 0.5,
+        "genome_set_id": 500,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.0_ssr0.7": {
+        "s": 0.0,
+        "sim_selfing_rate": 0.7,
+        "genome_set_id": 600,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.3_ssr0.0": {
+        "s": 0.3,
+        "sim_selfing_rate": 0.0,
+        "genome_set_id": 700,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.3_ssr0.1": {
+        "s": 0.3,
+        "sim_selfing_rate": 0.1,
+        "genome_set_id": 800,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.3_ssr0.2": {
+        "s": 0.3,
+        "sim_selfing_rate": 0.2,
+        "genome_set_id": 900,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.3_ssr0.3": {
+        "s": 0.3,
+        "sim_selfing_rate": 0.3,
+        "genome_set_id": 1000,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.3_ssr0.5": {
+        "s": 0.3,
+        "sim_selfing_rate": 0.5,
+        "genome_set_id": 1100,
+        "sim_selfing_g": 200
+    },
+    "sp_s0.3_ssr0.7": {
+        "s": 0.3,
+        "sim_selfing_rate": 0.7,
+        "genome_set_id": 1200,
+        "sim_selfing_g": 200
+    }
+}
