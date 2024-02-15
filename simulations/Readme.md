@@ -36,3 +36,14 @@ Simulation parameters are configured at three levels:
 
 - For the `r231116` subfolder, parameters are specified at the second level. Refer to `main.nf` for detailed information.
 - For the remaining subfolders (`r231125_*` and `r231127_*`), simulation parameters are provided in JSON files located within each subfolder, such as `r231125_A/mp_genome_sets.json` and `r231127_A/sp_genome_sets.json`.
+
+### Parameter names
+Some parameters used in the simulation script, espeically for the assortative mating model, have different names in the Supplementary Note 2. Here is a map of them.
+
+| In Paper        | in script                        |
+| --------------- | -------------------------------- |
+| G               |sim_relatedness_g                 |
+| B               |sim_relatedness_bypass            |
+| C               |sim_relatedness_bypass_complement |
+| D               |sim_relatedness_power             |
+| \delta          |sim_relatedness_delta             |
