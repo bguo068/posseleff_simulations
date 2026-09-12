@@ -17,6 +17,15 @@ params.peak_validate_meth = 'ihs' // 'xirs' or 'ihs'
 params.sp_sets_json = ""
 params.mp_sets_json = ""
 
+// comma separated set numbers used to subseting
+// mp_sets/sp_sets when only some of them are needed.
+// example:  params.genome_sets="10000,10003"
+params.genome_sets=""
+
+// whether to skip ibdne and infomap analysis parts
+params.skip_ibdne = false
+params.skip_ifm = false
+
 // default to false so it is consistent with previous version
 // can be set to true on the nextflow command line
 params.ibdne_no_diploid_convertion = "true"
@@ -97,6 +106,11 @@ if (params.mp_sets_json != '') {
 }
 
 
+if (params.genome_sets){
+    genome_sets = params.genome_sets.tokenize(",").collect{it -> it.toInteger()}
+    sp_sets = sp_sets.findAll {_k, v -> v.genome_set_id in genome_sets}
+    mp_sets = mp_sets.findAll {_k, v -> v.genome_set_id in genome_sets}
+}
 
 
 process SIM_SP_CHR {
@@ -389,6 +403,7 @@ workflow WF_SP {
     chr_chrno = channel.from(1..14)
     ch_sp_params = channel.from(expanded_sets.collect{k, v-> [k, v]})
 
+
     if (params.test) {
         ch_sp_params = ch_sp_params.first().map{
             label, args -> def args2 = args + [nsam:50]; [label, args2]
@@ -439,6 +454,9 @@ workflow WF_SP {
             [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
         .combine(ch_chrlist, by:0) // add chrlist
 
+    if (params.skip_ibdne){
+        ch_ibd_per_genome = channel.empty()
+    }
 
     // Process IBD for ibd distribution and ne analyses
     PROC_DIST_NE(ch_ibd_per_genome)
@@ -513,6 +531,10 @@ workflow WF_MP {
         .combine(ch_mp_params, by:0)
         .map{label, ll, args-> 
             [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
+
+    if (params.skip_ifm){
+        ch_ibd_per_genome = channel.empty()
+    }
 
     // Process IBD for ibd distribution and ne analyses
     PROC_INFOMAP(ch_ibd_per_genome)
