@@ -1,28 +1,7 @@
 #! /usr/bin/env python3
-import os
-import json
 import sys
 from pathlib import Path
-from subprocess import check_output, run
-
-# Install conda environment
-def is_conda_available():
-    return Path(os.environ["CONDA_EXE"]).exists()
-
-
-def is_simulation_env_installed():
-    jstr = check_output("conda env list --json", shell=True, text=True)
-    envs = json.loads(jstr)["envs"]
-    res = False
-    for env in envs:
-        if Path(env).name == "simulation":
-            res = True
-            break
-    return res
-
-
-def install_simulation_env(env_file: str):
-    run(f"mamba env create -f {env_file}", shell=True, check=True)
+from subprocess import run
 
 
 # Install tskibd
@@ -32,8 +11,7 @@ def install_tskibd():
     if not (curdir / "bin/tskibd").exists():
         run(
             f"""
-            eval "$(conda shell.bash hook)"
-            conda activate simulation
+            eval "$(pixi shell-hook)"
             rm -rf tskibd
             git clone https://github.com/bguo068/tskibd.git
             cd tskibd
@@ -61,9 +39,8 @@ def install_hmmibd():
     (curdir / "bin").mkdir(parents=True, exist_ok=True)
     if not (curdir / "bin/hmmIBD").exists():
         run(
-            f"""
-            eval "$(conda shell.bash hook)"
-            conda activate simulation
+            """
+            eval "$(pixi shell-hook)"
             git clone https://github.com/glipsnort/hmmIBD.git
             cd hmmIBD
             git checkout a2f796ef8122d7f6b983ae9ac4c6fba35afcd3aa
@@ -90,21 +67,10 @@ def download_ibdne():
     else:
         print("download ibdne.jar into bin/")
         url = "https://faculty.washington.edu/browning/ibdne/ibdne.23Apr20.ae9.jar"
-        assert run(f"wget {url} --no-check-certificate -O bin/ibdne.jar", shell=True).returncode == 0
+        run(f"wget {url} --no-check-certificate -O bin/ibdne.jar", shell=True, check=True)
 
 
 if __name__ == "__main__":
-
-    if not is_conda_available():
-        print("Conda is not installed. Please install Conda!", file=sys.stderr)
-        sys.exit(-1)
-    else:
-        print("Conda is installed")
-
-    if not is_simulation_env_installed():
-        install_simulation_env("./env.yaml")
-    else:
-        print("'simulation' Conda environment is installed")
 
     install_tskibd()
 

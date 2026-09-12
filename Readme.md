@@ -51,11 +51,11 @@ specified in the installation instruction below. The overall installation time
 is about 5-15 minutes.
 
 To create the software environment:
-1. Install nextflow. See [nextflow documentation](https://www.nextflow.io/docs/latest/getstarted.html)
-2. Install conda from [here](https://docs.conda.io/en/latest/miniconda.html) if you have not
-3. Install software: `python3 ./init.py`, this will
-    - Detect and Install `simulation` Conda environment
-        - including [`ibdutils`](https://github.com/bguo068/ibdutils)
+1. Install package manager `pixi` from [here](https://pixi.prefix.dev/latest/installation/) if you have not
+2. Clone the repo: `git clone https://github.com/bguo068/posseleff_simulations.git`
+3. Change the cloned directory: `cd posseleff_simulations`
+4. Install packages according the `pixi` recipe by running `pixi install` 
+5. Install additional software: `pixi run python ./init.py`, this will
     - Download and compile [`tskibd`](https://github.com/bguo068/tskibd) for
     true IBD inference from tree sequence
     - Download
@@ -64,8 +64,8 @@ To create the software environment:
 
 ## How to run the pipeline
 
-1. Activate the `simulation` environment: `conda activate simulation`
-2. Run the pipeline: `nextflow ./main.nf -profile sge --num_reps 30 -resume`. 
+1. Run the pipeline locally: `pixi run nextflow ./main.nf -resume`. Or, you can
+2. Run the pipeline on hpc: `pixi run nextflow ./main.nf -profile sge --num_reps 30 -resume`. 
 3. For large datasets, using a cluster such as SGE is recommended. An example
 `sge` profile is provided in the `nextflow.config` file and should be adjusted
 to fit your cluster system. If run on a local computer, please remove the
@@ -93,12 +93,7 @@ the `sp_sets` or `mp_sets`.
 # Citations
 
 If you find this repository useful, please cite our preprint:
-> Guo, B., Borda, V., Laboulaye, R., Spring, M. D., Wojnarski, M., Vesely, B.
-A., Silva, J. C., Waters, N. C., O'Connor, T. D., & Takala-Harrison, S. (2023).
-Strong Positive Selection Biases Identity-By-Descent-Based Inferences of Recent
-Demography and Population Structure in Plasmodium falciparum. bioRxiv : the
-preprint server for biology, 2023.07.14.549114.
-https://doi.org/10.1101/2023.07.14.549114
+> Guo B, Borda V, Laboulaye R, Spring MD, Wojnarski M, Vesely BA, Silva JC, Waters NC, O'Connor TD, Takala-Harrison S. Strong positive selection biases identity-by-descent-based inferences of recent demography and population structure in Plasmodium falciparum. Nat Commun. 2024 Mar 20;15(1):2499. doi: 10.1038/s41467-024-46659-0. PMID: 38509066; PMCID: PMC10954658.
 
 Other citations:
 
@@ -125,6 +120,8 @@ https://doi.org/10.1073/pnas.0706851105
 
 
 ## Related Repository:
-`tskibd`: https://github.com/bguo068/tskibd
+- `tskibd`: https://github.com/bguo068/tskibd
+- `ibdutils`: https://github.com/bguo068/ibdutils
+- empirical analysis pipeline: https://github.com/bguo068/posseleff_empirical
 
 
