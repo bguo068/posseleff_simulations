@@ -12,3 +12,6 @@ run_rep
 run_rep_filt_peaks
 run_rep_filt_peaks_3hits
 .vscode
+# pixi environments
+.pixi/*
+!.pixi/config.toml
