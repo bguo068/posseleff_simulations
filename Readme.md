@@ -65,8 +65,8 @@ To create the software environment:
 ## How to run the pipeline
 
 1. Run the pipeline locally: `pixi run nextflow ./main.nf -resume`. Or, you can
-2. Run the pipeline on hpc: `pixi run nextflow ./main.nf -profile sge --num_reps 30 -resume`. 
-3. For large datasets, using a cluster such as SGE is recommended. An example
+2. Run the pipeline on hpc: `pixi run nextflow ./main.nf -profile sge --num_reps 30 -resume` or use `-profile slurm` for using slurm scheduler.
+3. For large datasets, using a cluster such as SGE/Slurm is recommended. An example
 `sge` profile is provided in the `nextflow.config` file and should be adjusted
 to fit your cluster system. If run on a local computer, please remove the
 `-profile sge` option from the above command.
