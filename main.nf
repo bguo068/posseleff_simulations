@@ -107,7 +107,7 @@ if (params.mp_sets_json != '') {
 
 
 if (params.genome_sets){
-    genome_sets = params.genome_sets.tokenize(",").collect{it -> it.toInteger()}
+    genome_sets = "${params.genome_sets}".tokenize(",").collect{it -> it.toInteger()}
     sp_sets = sp_sets.findAll {_k, v -> v.genome_set_id in genome_sets}
     mp_sets = mp_sets.findAll {_k, v -> v.genome_set_id in genome_sets}
 }
