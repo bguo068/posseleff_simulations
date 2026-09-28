@@ -12,6 +12,7 @@ def install_tskibd():
         run(
             f"""
             eval "$(pixi shell-hook)"
+            if [ "$(uname)" = "Darwin" ]; then export LDFLAGS="-lSystem"; fi
             rm -rf tskibd
             git clone https://github.com/bguo068/tskibd.git
             cd tskibd
@@ -41,6 +42,7 @@ def install_hmmibd():
         run(
             """
             eval "$(pixi shell-hook)"
+            if [ "$(uname)" = "Darwin" ]; then export LDFLAGS="-lSystem"; fi
             git clone https://github.com/glipsnort/hmmIBD.git
             cd hmmIBD
             git checkout a2f796ef8122d7f6b983ae9ac4c6fba35afcd3aa
