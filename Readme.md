@@ -55,7 +55,7 @@ To create the software environment:
 2. Clone the repo: `git clone https://github.com/bguo068/posseleff_simulations.git`
 3. Change the cloned directory: `cd posseleff_simulations`
 4. Install packages according the `pixi` recipe by running `pixi install` 
-5. Install additional software: `pixi run python ./init.py`, this will
+5. Install additional software: `pixi run setup` (runs `./init.py`), this will
     - Download and compile [`tskibd`](https://github.com/bguo068/tskibd) for
     true IBD inference from tree sequence
     - Download

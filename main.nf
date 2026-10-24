@@ -7,7 +7,7 @@ params.ifm_transform = ["square", "cube", "none"][0]
 params.ifm_ntrials = 1000
 params.test = false
 params.num_reps = 1
-params.resdir = "res"
+params.resdir = "resdir"
 
 params.ibdne_mincm = 2
 params.ibdne_minregion = 10

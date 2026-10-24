@@ -6,6 +6,8 @@ platforms = ["osx-arm64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
+# Build/download the tools the pipeline runs from bin/ (tskibd, hmmIBD, ibdne.jar).
+setup = "python ./init.py"
 
 [dependencies]
 python = "3.10.6.*"
