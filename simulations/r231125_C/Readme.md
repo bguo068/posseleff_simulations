@@ -9,11 +9,11 @@ inbreeding via selfing (Multiple population model)
 python3 generate_json.py
 nextflow ../../main.nf \
     -profile sge \
-    -entry WF_MP \
+    --wf mp \
     -resume \
     --mp_sets_json mp_genome_sets.json \
     --ibdne_no_diploid_convertion true \
     --peak_validate_meth ihs \
     --num_reps 1 \
-    --resdir resdir
+    -output-dir resdir
 ```

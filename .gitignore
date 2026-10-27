@@ -5,6 +5,7 @@ modules/**
 .nextflow*
 resdir/**
 resdir*
+results/**
 **/work
 run_notes.txt
 run4

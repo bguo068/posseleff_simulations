@@ -32,7 +32,7 @@ pkg-config = "0.29.2.*"
 ruff = ">=0.16.7,<0.17"
 ty = ">=0.0.80,<0.0.81"
 openjdk = "21.*"
-nextflow = "23.*"
+nextflow = "26.10.*"
 wget = ">=1.25.0,<2"
 
 [pypi-dependencies]

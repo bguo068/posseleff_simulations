@@ -1,145 +1,205 @@
 #! /usr/bin/env nextflow
-import groovy.json.JsonSlurper
 
-nextflow.enable.dsl = 2
+nextflow.enable.types = true
 
-params.ifm_transform = ["square", "cube", "none"][0]
-params.ifm_ntrials = 1000
-params.test = false
-params.num_reps = 1
-params.resdir = "resdir"
+params {
+    // Which simulations to run: 'all', 'sp' (single population) or 'mp'
+    // (multiple population). Replaces the deprecated `-entry WF_SP` and
+    // `-entry WF_MP` command line options.
+    wf: String = 'all'
 
-params.ibdne_mincm = 2
-params.ibdne_minregion = 10
-params.ibdne_flatmeth = 'none'
-params.min_ibdne_chr_min_afreq = 0.2
-params.peak_validate_meth = 'ihs' // 'xirs' or 'ihs'
-params.sp_sets_json = ""
-params.mp_sets_json = ""
+    ifm_transform: String = 'square' // 'square', 'cube' or 'none'
+    ifm_ntrials: Integer = 1000
+    test: Boolean = false
+    num_reps: Integer = 1
 
-// comma separated set numbers used to subseting
-// mp_sets/sp_sets when only some of them are needed.
-// example:  params.genome_sets="10000,10003"
-params.genome_sets=""
+    ibdne_mincm: Float = 2.0
+    ibdne_minregion: Float = 10.0
+    ibdne_flatmeth: String = 'none'
+    min_ibdne_chr_min_afreq: Float = 0.2
+    peak_validate_meth: String = 'ihs' // 'xirs' or 'ihs'
+    sp_sets_json: String = ''
+    mp_sets_json: String = ''
 
-// whether to skip ibdne and infomap analysis parts
-params.skip_ibdne = false
-params.skip_ifm = false
+    // comma separated set numbers used to subseting
+    // mp_sets/sp_sets when only some of them are needed.
+    // example:  --genome_sets "10000,10003"
+    genome_sets: String = ''
 
-// default to false so it is consistent with previous version
-// can be set to true on the nextflow command line
-params.ibdne_no_diploid_convertion = "true"
-params.sim_multi_chrom_genome = false
+    // whether to skip ibdne and infomap analysis parts
+    skip_ibdne: Boolean = false
+    skip_ifm: Boolean = false
 
-def resdir = params.resdir
+    // default to true so it is consistent with previous version
+    // can be set to false on the nextflow command line
+    ibdne_no_diploid_convertion: Boolean = true
+    sim_multi_chrom_genome: Boolean = false
+}
 
-def sp_defaults = [
-    seqlen : 100 * 15000,
-    selpos : Math.round(0.33 * 100 * 15000),
-    num_origins : 1,
-    N : 10000,
-    h : 0.5,
-    s : 0.3,
-    g_sel_start : 80,
-    r : 0.01 / 15_000,
-    sim_relatedness : 0,
-    g_ne_change_start : 200,
-    N0 : 1000,
-    u : 1e-8,
-    nsam : 1000, // haploid
-]
+// A named set of simulation parameters for one genome (14 chromosomes)
+record SimSet {
+    label: String
+    args: Map
+}
 
-def mp_defaults = [
-    seqlen : 100 * 15000,
-    selpos : Math.round(100 * 15000 * 0.33),
-    num_origins : 1,
-    N : 10000,
-    h : 0.5,
-    s : 0.3,
-    g_sel_start : 80,
-    r : 0.01 / 15_000,
-    sim_relatedness : 0,
-    mig : 1e-5,
-    sel_mig : 0.01,
-    npop : 5,
-    nsam : 200, // haploid
-    Tsplit : 500,
-    u : 1e-8,
-]
+// Ne estimates of a genome, before or after removing IBD peaks
+record NeResult {
+    label: String
+    genome_set_id: Integer
+    are_peaks_removed: Boolean
+    ne: Path
+}
 
-def sp_sets = [
-    sp_neu: sp_defaults + [s: 0.0, genome_set_id: 10000],
-    sp_s01: sp_defaults + [s: 0.1, genome_set_id: 10001],
-    sp_s02: sp_defaults + [s: 0.2, genome_set_id: 10002],
-    sp_s03: sp_defaults + [s: 0.3, genome_set_id: 10003],
-    sp_g040:sp_defaults + [g_sel_start: 40, genome_set_id: 10004],
-    sp_g080:sp_defaults + [g_sel_start: 80, genome_set_id: 10005],
-    sp_g120:sp_defaults + [g_sel_start:120, genome_set_id: 10006],
-    sp_o01: sp_defaults + [num_origins: 1, genome_set_id: 10007],
-    sp_o03: sp_defaults + [num_origins: 3, genome_set_id: 10008],
-    sp_o27: sp_defaults + [num_origins: 27, genome_set_id: 10009],
-]
+// Infomap membership of a genome, before or after removing IBD peaks
+record InfomapResult {
+    label: String
+    genome_set_id: Integer
+    are_peaks_removed: Boolean
+    member: Path
+}
 
-def mp_sets = [
-    mp_s00: mp_defaults + [s:0.0, genome_set_id: 20000],
-    mp_s01: mp_defaults + [s:0.1, genome_set_id: 20001],
-    mp_s02: mp_defaults + [s:0.2, genome_set_id: 20002],
-    mp_s03: mp_defaults + [s:0.3, genome_set_id: 20003],
-]
+def sp_defaults() -> Map {
+    return [
+        seqlen : 100 * 15000,
+        selpos : Math.round(0.33 * 100 * 15000),
+        num_origins : 1,
+        N : 10000,
+        h : 0.5,
+        s : 0.3,
+        g_sel_start : 80,
+        r : 0.01 / 15_000,
+        sim_relatedness : 0,
+        g_ne_change_start : 200,
+        N0 : 1000,
+        u : 1e-8,
+        nsam : 1000, // haploid
+    ]
+}
+
+def mp_defaults() -> Map {
+    return [
+        seqlen : 100 * 15000,
+        selpos : Math.round(100 * 15000 * 0.33),
+        num_origins : 1,
+        N : 10000,
+        h : 0.5,
+        s : 0.3,
+        g_sel_start : 80,
+        r : 0.01 / 15_000,
+        sim_relatedness : 0,
+        mig : 1e-5,
+        sel_mig : 0.01,
+        npop : 5,
+        nsam : 200, // haploid
+        Tsplit : 500,
+        u : 1e-8,
+    ]
+}
+
+def sp_sets_builtin() -> Map {
+    def d = sp_defaults()
+    return [
+        sp_neu: d + [s: 0.0, genome_set_id: 10000],
+        sp_s01: d + [s: 0.1, genome_set_id: 10001],
+        sp_s02: d + [s: 0.2, genome_set_id: 10002],
+        sp_s03: d + [s: 0.3, genome_set_id: 10003],
+        sp_g040:d + [g_sel_start: 40, genome_set_id: 10004],
+        sp_g080:d + [g_sel_start: 80, genome_set_id: 10005],
+        sp_g120:d + [g_sel_start:120, genome_set_id: 10006],
+        sp_o01: d + [num_origins: 1, genome_set_id: 10007],
+        sp_o03: d + [num_origins: 3, genome_set_id: 10008],
+        sp_o27: d + [num_origins: 27, genome_set_id: 10009],
+    ]
+}
+
+def mp_sets_builtin() -> Map {
+    def d = mp_defaults()
+    return [
+        mp_s00: d + [s:0.0, genome_set_id: 20000],
+        mp_s01: d + [s:0.1, genome_set_id: 20001],
+        mp_s02: d + [s:0.2, genome_set_id: 20002],
+        mp_s03: d + [s:0.3, genome_set_id: 20003],
+    ]
+}
+
+// Render a map of arguments as command line options: --key1 value1 --key2 value2
+def to_cli_args(args: Map) -> String {
+    return args.keySet().collect { k -> "--${k} ${args[k]}" }.join(" ")
+}
+
+// Convert a map of genome sets (label -> simulation args) to a list of SimSet records
+def to_sim_sets(sets: Map) -> List<SimSet> {
+    return sets.keySet().collect { k -> record(label: k as String, args: sets[k] as Map) }.toList()
+}
 
 // if json file is provide, use params from json files
-def genome_sets_from_json(default_, json_fn) {
-    assert json_fn != ""
-    def json_slurper = new JsonSlurper()
-    def f = file(json_fn)
-    def config = json_slurper.parse(f)
-    def res =  config.collectEntries {k,v -> [k,  default_ + v ]}
-    return res
+def genome_sets_from_json(default_: Map, json_fn: String) -> List<SimSet> {
+    def config = new groovy.json.JsonSlurper().parse(file(json_fn)) as Map
+    return config.keySet().collect { k -> record(label: k as String, args: default_ + (config[k] as Map)) }.toList()
 }
 
-if (params.sp_sets_json != '') {
-    sp_sets = genome_sets_from_json(sp_defaults, params.sp_sets_json)
+// Build the simulation sets: builtin or json sets, optionally subset by
+// genome set ids, replicated `num_reps` times, and reduced to a single small
+// set in test mode.
+def make_sim_sets(
+    defaults: Map, builtin: Map, json_fn: String, genome_sets: String,
+    num_reps: Integer, test: Boolean, test_args: Map
+) -> List<SimSet> {
+    def sets = json_fn != '' ? genome_sets_from_json(defaults, json_fn) : to_sim_sets(builtin)
+
+    if (genome_sets != '') {
+        def ids = genome_sets.tokenize(',').collect { id -> id.strip().toInteger() }.toList()
+        sets = sets.findAll { s -> (s.args.genome_set_id as Integer) in ids }.toList()
+    }
+
+    if (num_reps != 1) {
+        sets = (0..<num_reps).collectMany { rep ->
+            sets.collect { s ->
+                def gsid = (s.args.genome_set_id as Integer) + 10 * rep
+                record(label: "${s.label}_rep${rep}", args: s.args + [genome_set_id: gsid])
+            }
+        }.toList()
+    }
+
+    if (test) {
+        sets = sets.take(1).collect { s -> record(label: s.label, args: s.args + test_args) }.toList()
+    }
+    return sets
 }
 
-if (params.mp_sets_json != '') {
-    mp_sets = genome_sets_from_json(mp_defaults, params.mp_sets_json)
-}
-
-
-if (params.genome_sets){
-    genome_sets = "${params.genome_sets}".tokenize(",").collect{it -> it.toInteger()}
-    sp_sets = sp_sets.findAll {_k, v -> v.genome_set_id in genome_sets}
-    mp_sets = mp_sets.findAll {_k, v -> v.genome_set_id in genome_sets}
+def chrno_from_file(f: Path) -> Integer {
+    return f.getSimpleName().tokenize('_')[-1].toInteger()
 }
 
 
 process SIM_SP_CHR {
     tag "${args.genome_set_id}_${chrno}"
 
-    publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/daf/", pattern: "*.daf", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/restart_count/", pattern: "*.restart_count", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/true_ne/", pattern: "*.true_ne", mode: 'symlink'
+    input:
+    record(label: String, chrno: Integer, args: Map)
 
-    input: 
-    tuple val(label), val(chrno), val(args)
-
-    output: 
-    tuple val(label), val(chrno), path("*.trees"), path("*.vcf.gz"), emit: trees_vcf
-    tuple val(label), val(chrno), path("*.daf"), emit: daf
-    tuple val(label), val(chrno), path("*.restart_count"), emit: restart_count
-    tuple val(label), val(chrno), path("*.true_ne"), emit: true_ne
+    output:
+    record(
+        label: label,
+        chrno: chrno,
+        args: args,
+        genome_set_id: args.genome_set_id as Integer,
+        trees: file('*.trees'),
+        vcf: file('*.vcf.gz'),
+        daf: file('*.daf'),
+        restart_count: file('*.restart_count'),
+        true_ne: file('*.true_ne'),
+    )
 
     script:
-    def args_chr = (args + [chrno: chrno]).collect{k, v-> "--${k} ${v}"}.join(" ")
+    def args_chr = to_cli_args(args + [chrno: chrno])
     """
     sim_single_pop.py $args_chr
 
     mkdir tmp; mv tmp_* tmp/
     """
     stub:
-    def prefix="${args.genome_set_id}_${chrno}"
+    def prefix = "${args.genome_set_id}_${chrno}"
     """
     touch ${prefix}{.trees,.vcf.gz,.daf,.restart_count,.true_ne}
     """
@@ -149,62 +209,64 @@ process SIM_SP_CHR {
 process SIM_SP_GW {
     tag "${args.genome_set_id}_genome_wide"
 
-    publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/daf/", pattern: "*.daf", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/restart_count/", pattern: "*.restart_count", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/true_ne/", pattern: "*.true_ne", mode: 'symlink'
+    input:
+    record(label: String, args: Map)
 
-    input: 
-    tuple val(label), val(args)
-
-    output: 
-    tuple val(label), path("*.trees"), path("*.vcf.gz"), emit: trees_vcf
-    tuple val(label), path("*.daf"), emit: daf
-    tuple val(label), path("*.restart_count"), emit: restart_count
-    tuple val(label), path("*.true_ne"), emit: true_ne
+    output:
+    record(
+        label: label,
+        args: args,
+        genome_set_id: args.genome_set_id as Integer,
+        trees: files('*.trees'),
+        vcf: files('*.vcf.gz'),
+        daf: file('*.daf'),
+        restart_count: file('*.restart_count'),
+        true_ne: file('*.true_ne'),
+    )
 
     script:
-    def args_chr = args.collect{k, v-> "--${k} ${v}"}.join(" ")
+    def args_chr = to_cli_args(args)
     """
     sim_single_pop_whole_genome.py $args_chr
 
     mkdir tmp; mv tmp_* tmp/
     """
     stub:
-    def prefix="${args.genome_set_id}"
+    def prefix = "${args.genome_set_id}"
     """
-    touch ${prefix}_{1..14}{.trees,.vcf.gz,.daf,.restart_count,.true_ne}
+    touch ${prefix}{.daf,.restart_count,.true_ne}
+    touch ${prefix}_{1..14}{.trees,.vcf.gz}
     """
 }
 
 process SIM_MP_CHR {
     tag "${args.genome_set_id}_${chrno}"
 
-    publishDir "${resdir}/${args.genome_set_id}_${label}/trees/", pattern: "*.trees", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/vcf/", pattern: "*.vcf.gz", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/restart_count/", pattern: "*.restart_count", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/daf/", pattern: "*.daf", mode: 'symlink'
-    publishDir "${resdir}/${args.genome_set_id}_${label}/demog/", pattern: "*_demog.png", mode: 'symlink'
-
     input:
-    tuple val(label), val(chrno), val(args)
+    record(label: String, chrno: Integer, args: Map)
 
     output:
-    tuple val(label), val(chrno), path("*.trees"), path("*.vcf.gz"), emit: trees_vcf
-    tuple val(label), val(chrno), path("*.daf"), emit: daf
-    tuple val(label), val(chrno), path("*.restart_count"), emit: restart_count
-    tuple val(label), val(chrno), path("*_demog.png"), emit: demog
+    record(
+        label: label,
+        chrno: chrno,
+        args: args,
+        genome_set_id: args.genome_set_id as Integer,
+        trees: file('*.trees'),
+        vcf: file('*.vcf.gz'),
+        daf: file('*.daf'),
+        restart_count: file('*.restart_count'),
+        demog: file('*_demog.png'),
+    )
 
     script:
-    def args_chr = (args + [chrno: chrno]).collect{k, v-> "--${k} ${v}"}.join(" ")
+    def args_chr = to_cli_args(args + [chrno: chrno])
     """
     sim_multiple_pop.py $args_chr
 
     mkdir tmp; mv tmp_* tmp/
     """
     stub:
-    def prefix="${args.genome_set_id}_${chrno}"
+    def prefix = "${args.genome_set_id}_${chrno}"
     """
     touch ${prefix}{.trees,.vcf.gz,.daf,.restart_count,_demog.png}
     """
@@ -213,14 +275,21 @@ process SIM_MP_CHR {
 process CALL_IBD {
     tag "${args.genome_set_id}_${chrno}"
 
-    publishDir "${resdir}/${args.genome_set_id}_${label}/tskibd/", pattern: "*_tskibd.ibd", mode: 'symlink'
+    input:
+    record(label: String, chrno: Integer, args: Map, trees: Path, vcf: Path)
 
-    input: 
-        tuple val(label), val(chrno), val(args),  path(trees), path(vcf)
     output:
-        tuple val(label), val(chrno), path("*_tskibd.ibd"), emit: tskibd
+    record(
+        label: label,
+        chrno: chrno,
+        args: args,
+        genome_set_id: args.genome_set_id as Integer,
+        vcf: vcf,
+        ibd: file('*_tskibd.ibd'),
+    )
+
     script:
-    def args_local = [
+    def args_local = to_cli_args([
         tree: trees,
         vcf: vcf,
         chrno: chrno,
@@ -228,12 +297,12 @@ process CALL_IBD {
         seqlen: args.seqlen,
         genome_set_id: args.genome_set_id,
         mincm: 2.0, call_hmmibd: 0, n:100, m:5,
-    ].collect{k, v-> "--${k} ${v}"}.join(" ")
+    ])
     """
     call_ibd.py ${args_local}
     """
     stub:
-    def prefix="${args.genome_set_id}_${chrno}"
+    def prefix = "${args.genome_set_id}_${chrno}"
     """
     touch ${prefix}{.map,_tskibd.ibd}
     """
@@ -242,36 +311,43 @@ process CALL_IBD {
 process PROC_DIST_NE {
     tag "${genome_set_id}"
 
-    publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.sh", mode: 'symlink'
-    publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.map", mode: 'symlink'
-    publishDir "${resdir}/${genome_set_id}_${label}/ne_input/", pattern: "*.ibd.gz", mode: 'symlink'
-    publishDir "${resdir}/${genome_set_id}_${label}/ibddist_ibd/", pattern: "*.ibddist.ibdobj.gz", mode: 'symlink'
-    publishDir "${resdir}/${genome_set_id}_${label}/ibdne_ibd/", pattern: "*.ibdne.ibdobj.gz", mode: 'symlink'
-
     input:
-        tuple val(label), path(ibd_lst), path(vcf_lst), val(genome_set_id), val(chrlist)
+    record(
+        label: String,
+        args: Map,
+        genome_set_id: Integer,
+        ibd_lst: List<Path>,
+        vcf_lst: List<Path>,
+        chrlist: String
+    )
+    ne_opts: Map
+
     output:
-        tuple val(label), path("ibdne.jar"), path("*_orig.sh"), \
-                path("*_orig.map"), path("*_orig.ibd.gz"), emit: ne_input_orig
-        tuple val(label), path("ibdne.jar"), path("*_rmpeaks.sh"),  \
-                path("*_rmpeaks.map"), path("*_rmpeaks.ibd.gz"), emit: ne_input_rmpeaks
-        tuple val(label), path("*.ibddist.ibdobj.gz"), emit: ibddist_ibd_obj
-        tuple val(label), path("*.ibdne.ibdobj.gz"), emit: ibdne_ibd_obj
-    script:
-    def args_local = [
-        ibd_files: "${ibd_lst}", // path is a blank separate list
-        vcf_files: "${vcf_lst}", // path is a blank separate list
-        peak_validate_meth: params.peak_validate_meth,
+    record(
+        label: label,
+        args: args,
         genome_set_id: genome_set_id,
-        ibdne_mincm: params.ibdne_mincm,
-        ibdne_minregion: params.ibdne_minregion,
-        ibdne_flatmeth: params.ibdne_flatmeth,
-        ibdne_no_diploid_conversion: params.ibdne_no_diploid_convertion,
+        ibdne_jar: file('ibdne.jar'),
+        orig_sh: file('*_orig.sh'),
+        orig_map: file('*_orig.map'),
+        orig_ibd: file('*_orig.ibd.gz'),
+        rmpeaks_sh: file('*_rmpeaks.sh'),
+        rmpeaks_map: file('*_rmpeaks.map'),
+        rmpeaks_ibd: file('*_rmpeaks.ibd.gz'),
+        ibddist_ibd_obj: file('*.ibddist.ibdobj.gz'),
+        ibdne_ibd_obj: files('*.ibdne.ibdobj.gz'),
+    )
+
+    script:
+    def args_local = to_cli_args([
+        ibd_files: ibd_lst.join(' '),
+        vcf_files: vcf_lst.join(' '),
+        genome_set_id: genome_set_id,
         ibdne_chrlist: chrlist,
-    ].collect{k, v-> "--${k} ${v}"}.join(" ")
+    ] + ne_opts)
 
     """
-    proc_dist_ne.py ${args_local} 
+    proc_dist_ne.py ${args_local}
     """
     stub:
     """
@@ -286,10 +362,15 @@ process PROC_DIST_NE {
 
 process DAF_TO_CHRLIST {
     tag "${label}"
-    input: tuple val(label), path(daf)
-    output: tuple val(label), env(CHRLIST)
+
+    input:
+    record(label: String, daf: Path)
+    min_afreq: Float
+
+    output:
+    record(label: label, chrlist: env('CHRLIST'))
+
     script:
-    def min_afreq = params.min_ibdne_chr_min_afreq
     """
     CHRLIST=`daf2chrlist.py --daf $daf  --min_afreq $min_afreq`
     """
@@ -302,21 +383,32 @@ process DAF_TO_CHRLIST {
 process PROC_INFOMAP {
     tag "${genome_set_id}"
 
-    publishDir "${resdir}/${genome_set_id}_${label}/ifm_input/", \
-        pattern: "*.ibdobj.gz", mode: 'symlink'
-
     input:
-        tuple val(label), path(ibd_lst), path(vcf_lst), val(genome_set_id)
+    record(
+        label: String,
+        args: Map,
+        genome_set_id: Integer,
+        ibd_lst: List<Path>,
+        vcf_lst: List<Path>
+    )
+    peak_validate_meth: String
+
     output:
-        tuple val(label), path("*_orig.ifm.ibdobj.gz"), emit: ifm_orig_ibd_obj
-        tuple val(label), path("*_rmpeaks.ifm.ibdobj.gz"), emit: ifm_rmpeaks_ibd_obj
-    script:
-    def args_local = [
-        ibd_files: "${ibd_lst}", // path is a blank separate list
-        vcf_files: "${vcf_lst}", // path is a blank separate list
+    record(
+        label: label,
+        args: args,
         genome_set_id: genome_set_id,
-        peak_validate_meth: params.peak_validate_meth,
-    ].collect{k, v-> "--${k} ${v}"}.join(" ")
+        ifm_orig_ibd_obj: file('*_orig.ifm.ibdobj.gz'),
+        ifm_rmpeaks_ibd_obj: file('*_rmpeaks.ifm.ibdobj.gz'),
+    )
+
+    script:
+    def args_local = to_cli_args([
+        ibd_files: ibd_lst.join(' '),
+        vcf_files: vcf_lst.join(' '),
+        genome_set_id: genome_set_id,
+        peak_validate_meth: peak_validate_meth,
+    ])
     """
     proc_infomap.py ${args_local}
     """
@@ -327,49 +419,67 @@ process PROC_INFOMAP {
 }
 
 process RUN_IBDNE {
-    tag "${args.genome_set_id}_${are_peaks_removed}"
-
-    publishDir "${resdir}/${args.genome_set_id}_${label}/ne_output/",  mode: 'symlink'
+    tag "${genome_set_id}_${are_peaks_removed}"
 
     input:
-        tuple val(label), path(ibdne_jar), path(ibdne_sh), path(gmap), path(ibd_gz), \
-            val(are_peaks_removed), val(args)
+    record(
+        label: String,
+        genome_set_id: Integer,
+        ibdne_jar: Path,
+        ibdne_sh: Path,
+        gmap: Path,
+        ibd_gz: Path,
+        are_peaks_removed: Boolean
+    )
+
     output:
-        tuple val(label), val(are_peaks_removed), path("*.ne")
+    record(
+        label: label,
+        genome_set_id: genome_set_id,
+        are_peaks_removed: are_peaks_removed,
+        ne: file('*.ne'),
+    )
+
     script:
     """
     bash ${ibdne_sh}
     """
     stub:
-    def src = are_peaks_removed ? "rmpeaks": "orig"
+    def src = are_peaks_removed ? "rmpeaks" : "orig"
     """
-    touch ${args.genome_set_id}_${src}.ne
+    touch ${genome_set_id}_${src}.ne
     """
 }
 
 process RUN_INFOMAP {
     tag "${args.genome_set_id}_${are_peaks_removed}"
-    publishDir "${resdir}/${args.genome_set_id}_${label}/ifm_output/",  mode: 'symlink'
+
     input:
-        tuple val(label), path(ibd_obj), val(are_peaks_removed), val(args)
+    record(label: String, args: Map, ibd_obj: Path, are_peaks_removed: Boolean)
+    ifm_opts: Map
+
     output:
-        tuple val(label), val(are_peaks_removed), path("*_member.pq")
+    record(
+        label: label,
+        genome_set_id: args.genome_set_id as Integer,
+        are_peaks_removed: are_peaks_removed,
+        member: file('*_member.pq'),
+    )
+
     script:
-    def cut_mode = are_peaks_removed? 'rmpeaks': 'orig'
-    def args_local = [
+    def cut_mode = are_peaks_removed ? 'rmpeaks' : 'orig'
+    def args_local = to_cli_args([
         ibd_obj: ibd_obj,
         npop: args.npop,
         nsam: args.nsam,
         genome_set_id: args.genome_set_id,
         cut_mode: cut_mode,
-        ntrials: params.ifm_ntrials,
-        transform: params.ifm_transform,
-    ].collect{k, v-> "--${k} ${v}"}.join(" ")
+    ] + ifm_opts)
     """
     run_infomap.py ${args_local}
     """
     stub:
-    def cut_mode = are_peaks_removed? 'rmpeaks': 'orig'
+    def cut_mode = are_peaks_removed ? 'rmpeaks' : 'orig'
     """
     touch ${args.genome_set_id}_${cut_mode}_member.pq
     """
@@ -378,178 +488,270 @@ process RUN_INFOMAP {
 
 
 workflow WF_SP {
-    // SIMULATION SETS
+    take:
+    sp_sets: Channel<SimSet>
+    sim_multi_chrom_genome: Boolean
+    skip_ibdne: Boolean
+    min_chr_afreq: Float
+    ne_opts: Map
 
-    // println("\n\n------------- Single Population Sets-------------")
-    // sp_sets.each{k, v -> println("${k}\t\t${v}")}
+    main:
+    def nchrom = 14
 
-    def expanded_sets = [:]
+    // SIMULATE chromosomes, either independently (one task per chromosome)
+    // or as a whole genome (one task per genome) for inbreeding simulation
+    ch_sets_chr = sp_sets.filter { _s -> !sim_multi_chrom_genome }
+    ch_sets_gw = sp_sets.filter { _s -> sim_multi_chrom_genome }
 
-    if(params.num_reps == 1) {
-        expanded_sets = sp_sets
-    } else{
-        (0..<(params.num_reps)).each {rep ->
-            sp_sets.each{k, v->
-                def k1 = "${k}_rep${rep}"
-                def v1 = v + [genome_set_id: v.genome_set_id + 10 *  rep]
-                expanded_sets[k1] = v1
-            }
-        } 
-    }
+    ch_sims_chr = SIM_SP_CHR(
+        ch_sets_chr.flatMap { s ->
+            (1..nchrom).collect { chrno -> record(label: s.label, chrno: chrno, args: s.args) }
+        }
+    )
 
+    ch_sims_gw = SIM_SP_GW(ch_sets_gw)
 
-
-    // SIMULATE chromosomes
-    chr_chrno = channel.from(1..14)
-    ch_sp_params = channel.from(expanded_sets.collect{k, v-> [k, v]})
-
-
-    if (params.test) {
-        ch_sp_params = ch_sp_params.first().map{
-            label, args -> def args2 = args + [nsam:50]; [label, args2]
+    // split genome-wide outputs into per-chromosome trees/vcf, sorted by chromosome numbers
+    ch_trees_vcf_gw = ch_sims_gw.flatMap { r ->
+        r.trees.toSorted { t -> chrno_from_file(t) }.collect { t ->
+            def chrno = chrno_from_file(t)
+            def vcf = r.vcf.find { v -> chrno_from_file(v) == chrno }
+            record(label: r.label, chrno: chrno, args: r.args, trees: t, vcf: vcf)
         }
     }
-
-    if (params.sim_multi_chrom_genome) {
-        SIM_SP_GW(ch_sp_params)
-        // need sort by chromosome numbers
-        ch_trees = SIM_SP_GW.out.trees_vcf.flatMap{label, trees, vcf -> 
-            trees.collect{t-> [label, t.getSimpleName().split("_")[-1].toInteger(), t]}
-        }
-        ch_vcf = SIM_SP_GW.out.trees_vcf.flatMap{label, trees, vcf ->
-            vcf.collect{v-> [label, v.getSimpleName().split("_")[-1].toInteger(), v]}
-        } 
-        ch_trees_vcf = ch_trees.combine(ch_vcf, by:[0,1])
-
-        // chr list of DAF > params.min_ibdne_chr_min_afreq
-        DAF_TO_CHRLIST(SIM_SP_GW.out.daf)
-        ch_chrlist = DAF_TO_CHRLIST.out
-
-    } else{
-        SIM_SP_CHR(ch_sp_params.combine(chr_chrno).map{a,b,c->[a,c,b]})
-        ch_trees_vcf = SIM_SP_CHR.out.trees_vcf
-
-        // make chr list with all chromosomes when simulate chromosome independently
-        ch_chrlist = ch_sp_params.map {label, _args -> 
-            def chrlist_str = (1..14).join(" ")
-            [label,chrlist_str ]
-        }
+    ch_trees_vcf_chr = ch_sims_chr.map { r ->
+        record(label: r.label, chrno: r.chrno, args: r.args, trees: r.trees, vcf: r.vcf)
     }
+
+    // chr list of DAF > min_chr_afreq for genome-wide simulations, or all
+    // chromosomes when chromosomes are simulated independently
+    ch_chrlist = DAF_TO_CHRLIST(ch_sims_gw, min_chr_afreq)
+        .mix(ch_sets_chr.map { s -> record(label: s.label, chrlist: (1..nchrom).join(" ")) })
 
     // CALL IBD segment per chromosome
-    CALL_IBD(ch_trees_vcf.combine(ch_sp_params, by:0)
-        .map{label,chrno,trees,vcf,args-> [label,chrno, args, trees, vcf]}
-    )
+    ch_ibd = CALL_IBD(ch_trees_vcf_chr.mix(ch_trees_vcf_gw))
 
     // COLLECT PER SETS
-    ch_ibd_per_genome = CALL_IBD.out.tskibd
-        // tskibd: label, chrno, ibd
-        // trees_vcf: label, chrno, tree, vcf
-        .combine(ch_trees_vcf.map{it[[0, 1, 3]]}, by: [0, 1])
-        .map{ label, chrno, ibd, vcf -> 
-            [groupKey(label, 14), [chrno, ibd, vcf]] }
-        .groupTuple(by:0, sort: {x,y-> x[0]<=>y[0] })
-        .combine(ch_sp_params, by:0)
-        .map{label, ll, args-> 
-            [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
-        .combine(ch_chrlist, by:0) // add chrlist
-
-    if (params.skip_ibdne){
-        ch_ibd_per_genome = channel.empty()
-    }
+    ch_ibd_per_genome = ch_ibd
+        .map { r -> tuple(r.label, nchrom, r) }
+        .groupBy()
+        .map { label, rs ->
+            def sorted = rs.toSorted { r -> r.chrno }
+            record(
+                label: label,
+                args: sorted[0].args,
+                genome_set_id: sorted[0].genome_set_id,
+                ibd_lst: sorted.collect { r -> r.ibd }.toList(),
+                vcf_lst: sorted.collect { r -> r.vcf }.toList(),
+            )
+        }
+        .join(ch_chrlist, by: 'label') // add chrlist
+        .filter { _r -> !skip_ibdne }
 
     // Process IBD for ibd distribution and ne analyses
-    PROC_DIST_NE(ch_ibd_per_genome)
-
+    ch_ne_input = PROC_DIST_NE(ch_ibd_per_genome, ne_opts)
 
     // RUN IBDNe actually
-    RUN_IBDNE(
-        PROC_DIST_NE.out.ne_input_orig.map{it -> it + false}.map{it-> it + expanded_sets[it[0]]}
-        // use mix so the second part do not have to wait for first part to finish complely
-        .mix(
-            PROC_DIST_NE.out.ne_input_rmpeaks.map{it -> it + true}.map{it-> it + expanded_sets[it[0]]}
-        )
+    // use mix so the second part do not have to wait for first part to finish complely
+    ch_ne = RUN_IBDNE(
+        ch_ne_input.map { r ->
+            record(
+                label: r.label, genome_set_id: r.genome_set_id, ibdne_jar: r.ibdne_jar,
+                ibdne_sh: r.orig_sh, gmap: r.orig_map, ibd_gz: r.orig_ibd, are_peaks_removed: false,
+            )
+        }.mix(ch_ne_input.map { r ->
+            record(
+                label: r.label, genome_set_id: r.genome_set_id, ibdne_jar: r.ibdne_jar,
+                ibdne_sh: r.rmpeaks_sh, gmap: r.rmpeaks_map, ibd_gz: r.rmpeaks_ibd, are_peaks_removed: true,
+            )
+        })
     )
-    
 
+    emit:
+    sims: Channel<Record> = ch_sims_chr
+    sims_gw: Channel<Record> = ch_sims_gw
+    ibd: Channel<Record> = ch_ibd
+    ne_input: Channel<Record> = ch_ne_input
+    ne: Channel<NeResult> = ch_ne
 }
 
 
 workflow WF_MP {
-    // SIMULATION SETS
-    
-    // println("\n\n------------- Multiple Population Sets-------------")
-    // mp_sets.each{k, v -> println("${k}\t\t${v}")}
+    take:
+    mp_sets: Channel<SimSet>
+    skip_ifm: Boolean
+    peak_validate_meth: String
+    ifm_opts: Map
+
+    main:
     def nchrom = 14
-    // if (params.sim_inbreeding){ nchrom = 1 }
-
-    def expanded_sets = [:]
-
-    if(params.num_reps == 1)
-    {
-        expanded_sets = mp_sets
-    }
-    else {
-        (0..<(params.num_reps)).each {rep ->
-            mp_sets.each{k, v->
-                def k1 = "${k}_rep${rep}"
-                def v1 = v + [genome_set_id: v.genome_set_id + 10 *  rep]
-                expanded_sets[k1] = v1
-            }
-        } 
-
-    }
 
     // SIMULATE chromosomes
-    chr_chrno = channel.from(1..nchrom)
-    ch_mp_params = channel.from(expanded_sets.collect{k, v-> [k, v]})
-
-    if (params.test) {
-        ch_mp_params = ch_mp_params.first().map{
-            label, args -> def args2 = args + [nsam:50, npop:2, N:500]; [label, args2]
+    ch_sims = SIM_MP_CHR(
+        mp_sets.flatMap { s ->
+            (1..nchrom).collect { chrno -> record(label: s.label, chrno: chrno, args: s.args) }
         }
-    }
-
-    SIM_MP_CHR(ch_mp_params.combine(chr_chrno).map{a,b,c->[a,c,b]})
-
-
+    )
 
     // CALL IBD segment per chromosome
-    CALL_IBD(SIM_MP_CHR.out.trees_vcf.combine(ch_mp_params, by:0)
-        .map{label,chrno,trees,vcf,args-> [label,chrno, args, trees, vcf]}
-    )
-
+    ch_ibd = CALL_IBD(ch_sims)
 
     // COLLECT PER SETS
-    ch_ibd_per_genome = CALL_IBD.out.tskibd
-        // tskibd: label, chrno, ibd
-        // trees_vcf: label, chrno, tree, vcf
-        .combine(SIM_MP_CHR.out.trees_vcf.map{it[[0, 1, 3]]}, by: [0, 1])
-        .map{ label, chrno, ibd, vcf -> 
-            [groupKey(label, nchrom), [chrno, ibd, vcf]] }
-        .groupTuple(by:0, sort: {x,y-> x[0]<=>y[0] })
-        .combine(ch_mp_params, by:0)
-        .map{label, ll, args-> 
-            [label, ll.collect{it[1]}, ll.collect{it[2]}, args.genome_set_id]}
+    ch_ibd_per_genome = ch_ibd
+        .map { r -> tuple(r.label, nchrom, r) }
+        .groupBy()
+        .map { label, rs ->
+            def sorted = rs.toSorted { r -> r.chrno }
+            record(
+                label: label,
+                args: sorted[0].args,
+                genome_set_id: sorted[0].genome_set_id,
+                ibd_lst: sorted.collect { r -> r.ibd }.toList(),
+                vcf_lst: sorted.collect { r -> r.vcf }.toList(),
+            )
+        }
+        .filter { _r -> !skip_ifm }
 
-    if (params.skip_ifm){
-        ch_ibd_per_genome = channel.empty()
-    }
-
-    // Process IBD for ibd distribution and ne analyses
-    PROC_INFOMAP(ch_ibd_per_genome)
-
+    // Process IBD for population structure analyses
+    ch_ifm_input = PROC_INFOMAP(ch_ibd_per_genome, peak_validate_meth)
 
     // RUN INFOMAP
-    RUN_INFOMAP(
-        PROC_INFOMAP.out.ifm_orig_ibd_obj.map{it -> it + false}.combine(ch_mp_params, by:0).mix(
-            PROC_INFOMAP.out.ifm_rmpeaks_ibd_obj.map{it -> it + true}.combine(ch_mp_params, by:0)
-        )
+    ch_ifm = RUN_INFOMAP(
+        ch_ifm_input.map { r ->
+            record(label: r.label, args: r.args, ibd_obj: r.ifm_orig_ibd_obj, are_peaks_removed: false)
+        }.mix(ch_ifm_input.map { r ->
+            record(label: r.label, args: r.args, ibd_obj: r.ifm_rmpeaks_ibd_obj, are_peaks_removed: true)
+        }),
+        ifm_opts
     )
 
+    emit:
+    sims: Channel<Record> = ch_sims
+    ibd: Channel<Record> = ch_ibd
+    ifm_input: Channel<Record> = ch_ifm_input
+    ifm: Channel<InfomapResult> = ch_ifm
 }
 
 workflow {
-    WF_SP()
-    WF_MP()
+    main:
+    if (!(params.wf in ['all', 'sp', 'mp'])) {
+        error "Invalid --wf '${params.wf}': expected 'all', 'sp' or 'mp'"
+    }
+
+    def sp_sets = params.wf in ['all', 'sp']
+        ? make_sim_sets(
+            sp_defaults(), sp_sets_builtin(), params.sp_sets_json, params.genome_sets,
+            params.num_reps, params.test, [nsam: 50]
+        )
+        : []
+    def mp_sets = params.wf in ['all', 'mp']
+        ? make_sim_sets(
+            mp_defaults(), mp_sets_builtin(), params.mp_sets_json, params.genome_sets,
+            params.num_reps, params.test, [nsam: 50, npop: 2, N: 500]
+        )
+        : []
+
+    def ne_opts = [
+        peak_validate_meth: params.peak_validate_meth,
+        ibdne_mincm: params.ibdne_mincm,
+        ibdne_minregion: params.ibdne_minregion,
+        ibdne_flatmeth: params.ibdne_flatmeth,
+        ibdne_no_diploid_conversion: params.ibdne_no_diploid_convertion,
+    ]
+    def ifm_opts = [
+        ntrials: params.ifm_ntrials,
+        transform: params.ifm_transform,
+    ]
+
+    sp = WF_SP(
+        channel.fromList(sp_sets),
+        params.sim_multi_chrom_genome,
+        params.skip_ibdne,
+        params.min_ibdne_chr_min_afreq,
+        ne_opts,
+    )
+    mp = WF_MP(
+        channel.fromList(mp_sets),
+        params.skip_ifm,
+        params.peak_validate_meth,
+        ifm_opts,
+    )
+
+    publish:
+    sp_sims = sp.sims
+    sp_gw_sims = sp.sims_gw
+    mp_sims = mp.sims
+    tskibd = sp.ibd.mix(mp.ibd)
+    ne_input = sp.ne_input
+    ne_output = sp.ne
+    ifm_input = mp.ifm_input
+    ifm_output = mp.ifm
+}
+
+// All outputs are published under `outputDir` (`results` by default, see
+// nextflow.config), one subfolder per genome set: <genome_set_id>_<label>/
+output {
+    sp_sims {
+        path { r ->
+            r.trees >> "${r.genome_set_id}_${r.label}/trees/"
+            r.vcf >> "${r.genome_set_id}_${r.label}/vcf/"
+            r.daf >> "${r.genome_set_id}_${r.label}/daf/"
+            r.restart_count >> "${r.genome_set_id}_${r.label}/restart_count/"
+            r.true_ne >> "${r.genome_set_id}_${r.label}/true_ne/"
+        }
+    }
+
+    sp_gw_sims {
+        path { r ->
+            r.trees >> "${r.genome_set_id}_${r.label}/trees/"
+            r.vcf >> "${r.genome_set_id}_${r.label}/vcf/"
+            r.daf >> "${r.genome_set_id}_${r.label}/daf/"
+            r.restart_count >> "${r.genome_set_id}_${r.label}/restart_count/"
+            r.true_ne >> "${r.genome_set_id}_${r.label}/true_ne/"
+        }
+    }
+
+    mp_sims {
+        path { r ->
+            r.trees >> "${r.genome_set_id}_${r.label}/trees/"
+            r.vcf >> "${r.genome_set_id}_${r.label}/vcf/"
+            r.restart_count >> "${r.genome_set_id}_${r.label}/restart_count/"
+            r.daf >> "${r.genome_set_id}_${r.label}/daf/"
+            r.demog >> "${r.genome_set_id}_${r.label}/demog/"
+        }
+    }
+
+    tskibd {
+        path { r -> r.ibd >> "${r.genome_set_id}_${r.label}/tskibd/" }
+    }
+
+    ne_input {
+        path { r ->
+            [r.orig_sh, r.orig_map, r.orig_ibd, r.rmpeaks_sh, r.rmpeaks_map, r.rmpeaks_ibd] >> "${r.genome_set_id}_${r.label}/ne_input/"
+            r.ibddist_ibd_obj >> "${r.genome_set_id}_${r.label}/ibddist_ibd/"
+            r.ibdne_ibd_obj >> "${r.genome_set_id}_${r.label}/ibdne_ibd/"
+        }
+    }
+
+    ne_output {
+        path { r -> r.ne >> "${r.genome_set_id}_${r.label}/ne_output/" }
+        index {
+            path 'ne_output.csv'
+            header true
+        }
+    }
+
+    ifm_input {
+        path { r ->
+            [r.ifm_orig_ibd_obj, r.ifm_rmpeaks_ibd_obj] >> "${r.genome_set_id}_${r.label}/ifm_input/"
+        }
+    }
+
+    ifm_output {
+        path { r -> r.member >> "${r.genome_set_id}_${r.label}/ifm_output/" }
+        index {
+            path 'ifm_output.csv'
+            header true
+        }
+    }
 }

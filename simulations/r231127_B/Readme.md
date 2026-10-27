@@ -9,7 +9,7 @@ simulation inbreeding by changing selfing rate (single population model)
 python3 generate_json.py
 nextflow ../../main.nf \
     -profile sge  \
-    -entry WF_SP \
+    --wf sp \
     -resume \
     --sp_sets_json sp_genome_sets.json \
     --ibdne_no_diploid_convertion true \

@@ -71,24 +71,35 @@ To create the software environment:
 to fit your cluster system. If run on a local computer, please remove the
 `-profile sge` option from the above command.
 4. The pipeline can be reconfigured in the following files
-    - Pipeline parameters can be found top lines in `main.nf`
-    - More simulation parameters can be found in the definition of
-     `sp_defaults`,`mp_defaults`, `sp_sets` and `mp_sets` dictionaries within
-     the `main.nf` file
+    - Pipeline parameters are declared in the typed `params` block at the top of `main.nf`
+    - More simulation parameters can be found in the `sp_defaults()`,
+     `mp_defaults()`, `sp_sets_builtin()` and `mp_sets_builtin()` functions
+     within the `main.nf` file
     - For more complicated or large scale simulations, the `--sp_sets_json`,
-    `--mp_sets_json` arguments and `-entry` option are recommended.  see
+    `--mp_sets_json` and `--wf` arguments are recommended.  see
     `simulations/Readme.md` for examples.
+    - `--wf sp` or `--wf mp` runs only the single- or multiple-population
+    simulations (default: `--wf all`). This replaces the `-entry WF_SP` /
+    `-entry WF_MP` options used with older versions of the pipeline.
+5. The pipeline requires Nextflow >= 26.10 (installed by `pixi`). It uses
+static typing (`nextflow.enable.types`) and workflow outputs (the `output`
+block in `main.nf`). Run `pixi run nextflow lint main.nf` to type-check changes.
 
 ## Input, Test Data and Output
 
 1. No input or test data is needed. If desired, pipeline can be reconfigured as
-mentioned above. The pipeline can be tested by commenting all but one entry in
-the `sp_sets` or `mp_sets`.
-2. Output files/folders:
-    - each subfolder of `resdir` represents simulations for a set of chromosomes
+mentioned above. The pipeline can be tested with `--test`, which runs only the
+first entry of `sp_sets` and `mp_sets` with a small sample size, or quickly
+dry-run with `-stub`.
+2. Output files/folders (published as symlinks into the `outputDir` set in
+`nextflow.config`, default `results`; override with `-output-dir <dir>`):
+    - each subfolder of `results` represents simulations for a set of chromosomes
     - within each subfolder:
         - `ifm_output` contains infomap results
         - `ne_output` contains IBDNe estimates
+    - `results/ne_output.csv` and `results/ifm_output.csv` are index files listing
+    the IBDNe and infomap result files with their label, genome set id and
+    whether IBD peaks were removed
 
 # Citations
 
