@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+import shutil
 import sys
 from pathlib import Path
 from subprocess import run
@@ -72,7 +73,34 @@ def download_ibdne():
         run(f"wget {url} --no-check-certificate -O bin/ibdne.jar", shell=True, check=True)
 
 
+# Build SLiM where conda has no build of it (linux-aarch64)
+def install_slim():
+    curdir = Path(".").absolute()
+    (curdir / "bin").mkdir(parents=True, exist_ok=True)
+    if shutil.which("slim") or (curdir / "bin/slim").exists():
+        print("slim already available")
+        return
+    run(
+        f"""
+        set -e
+        eval "$(pixi shell-hook)"
+        rm -rf SLiM
+        git clone --depth 1 --branch v4.1 https://github.com/MesserLab/SLiM.git
+        cmake -G Ninja -S SLiM -B SLiM/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+        cmake --build SLiM/build --target slim -j 4
+        cp SLiM/build/slim {curdir}/bin/slim
+        rm -rf SLiM
+        """,
+        shell=True,
+        check=True,
+        executable="bash",
+    )
+    print("install slim into bin/")
+
+
 if __name__ == "__main__":
+
+    install_slim()
 
     install_tskibd()
 
